@@ -1,0 +1,18 @@
+[package]
+name = "rustrt"
+version = "0.1.0"
+authors = ["Rainer Volz <rainer.volz@storema.de>"]
+edition = "2018"
+
+[[test]]
+name = "cucumber"
+harness = false # Allows Cucumber to print output instead of libtest
+
+[dependencies]
+
+[dev-dependencies]
+cucumber_rust = "^0.5.1"
+
+[features]
+default = ["nightly"]
+nightly = []
