@@ -9,12 +9,16 @@ pub struct Tuple {
   w: f64
 }
 
-pub fn tuple(x:f64, y:f64, z:f64, w:f64) -> Tuple {
-  Tuple {x,y,z,w}
+pub fn color(x:f64, y:f64, z:f64) -> Tuple {
+  Tuple {x,y,z,w:0.0}
 }
 
 pub fn point(x:f64, y:f64, z:f64) -> Tuple {
   Tuple {x,y,z,w:1.0}
+}
+
+pub fn tuple(x:f64, y:f64, z:f64, w:f64) -> Tuple {
+  Tuple {x,y,z,w}
 }
 
 pub fn vector(x:f64, y:f64, z:f64) -> Tuple {
@@ -36,7 +40,10 @@ impl Tuple {
   pub fn get_y(&self) -> &f64 { &self.y }
   pub fn get_z(&self) -> &f64 { &self.z }
   pub fn get_w(&self) -> &f64 { &self.w }
-
+  pub fn red(&self) -> &f64 { &self.x }
+  pub fn green(&self) -> &f64 { &self.y }
+  pub fn blue(&self) -> &f64 { &self.z }
+  
   /// Computes the cross product of two vectors. Panics with points
   pub fn cross(&self, rhs: Tuple) -> Tuple {
     if is_point(&self) || is_point(&rhs) {
@@ -130,6 +137,22 @@ impl ops::Mul<f64> for Tuple {
       y: self.y * _rhs,
       z: self.z * _rhs,
       w: self.w * _rhs,
+    }
+  }
+}
+
+impl ops::Mul for Tuple {
+  type Output = Tuple;
+
+  fn mul(self, _rhs: Tuple) -> Tuple {
+    if is_point(&self) || is_point(&_rhs) {
+      panic!("Multiplying points not defined: {:?} * {:?}",self,_rhs);
+    }
+    Tuple {
+      x: self.x * _rhs.x,
+      y: self.y * _rhs.y,
+      z: self.z * _rhs.z,
+      w: self.w * _rhs.w,
     }
   }
 }

@@ -9,6 +9,9 @@ pub struct MyWorld {
   a1: Tuple,
   a2: Tuple,
   b: Tuple,
+  c: Tuple,
+  c1: Tuple,
+  c2: Tuple,
   p: Tuple,
   p1: Tuple,
   p2: Tuple,
@@ -28,6 +31,9 @@ impl std::default::Default for MyWorld {
         a1: tuple(0.0,0.0,0.0,0.0),
         a2: tuple(0.0,0.0,0.0,0.0),
         b: tuple(0.0,0.0,0.0,0.0),
+        c: tuple(0.0,0.0,0.0,0.0),
+        c1: tuple(0.0,0.0,0.0,0.0),
+        c2: tuple(0.0,0.0,0.0,0.0),
         p: tuple(0.0,0.0,0.0,0.0),
         p1: tuple(0.0,0.0,0.0,0.0),
         p2: tuple(0.0,0.0,0.0,0.0),
@@ -42,7 +48,7 @@ impl std::default::Default for MyWorld {
 
 mod tuple_steps {
   use super::*;
-  use rustrt::tuple::{tuple,point,vector};
+  use rustrt::tuple::{tuple,point,vector,color};
   // Any type that implements cucumber_rust::World + Default can be the world
   steps!(MyWorld => {
       given regex "a ← tuple\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64,f64,f64,f64) |world, n1, n2, n3, n4, _step| {
@@ -88,6 +94,15 @@ mod tuple_steps {
 
       given regex "zero ← vector\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64,f64,f64) |world, n1, n2, n3, _step| {
         world.v = vector(n1, n2, n3);
+      };
+
+      given regex "c ← color\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64,f64,f64) |world, n1, n2, n3, _step| {
+        world.c = color(n1, n2, n3);
+      };
+      given regex "c1 ← color\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64,f64,f64) |world, n1, n2, n3, _step| {
+        world.c1 = color(n1, n2, n3);
+      };given regex "c2 ← color\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64,f64,f64) |world, n1, n2, n3, _step| {
+        world.c2 = color(n1, n2, n3);
       };
 
       when "norm ← normalize(v)" |world, _step| {
@@ -197,6 +212,50 @@ mod tuple_steps {
           assert_eq!(world.b.cross(world.a), vector(n1,n2,n3));
         }
       };
+
+      then regex "c.([a-z]+) = ([-+]?[0-9]*\\.?[0-9]+)" (String,f64) |world, color, number, _step| {
+        let mut result = &0.0f64;
+        match color.as_ref() {
+          "red" => result = world.c.red(),
+          "green" => result = world.c.green(),
+          "blue" => result = world.c.blue(),
+          _ => (),
+        }
+        assert_eq!(result, &number);
+      };
+
+      then regex "c1 \\+ c2 = color\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64,f64,f64) |world, n1, n2, n3, _step| {
+        assert_eq!(world.c1 + world.c2, color(n1, n2, n3));
+      };
+
+      then regex "c1 \\- c2 = color\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64,f64,f64) |world, n1, n2, n3, _step| {
+        // due to rounding problems
+        let c: Tuple = world.c1 - world.c2;
+        let p = tuple(
+          (c.get_x() * 10.0).round() / 10.0,
+          (c.get_y() * 10.0).round() / 10.0,
+          (c.get_z() * 10.0).round() / 10.0,
+          0.0
+        );
+        assert_eq!(p, color(n1, n2, n3));
+      };
+
+      then regex "c \\* ([-+]?[0-9]*\\.?[0-9]+) = color\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64, f64,f64,f64) |world, scalar, n1, n2, n3, _step| {
+        assert_eq!(world.c * scalar, color(n1, n2, n3));
+      };
+
+      then regex "c1 \\* c2 = color\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64,f64,f64) |world, n1, n2, n3, _step| {
+        // due to rounding problems
+        let c: Tuple = world.c1 * world.c2;
+        let p = tuple(
+          (c.get_x() * 10.0).round() / 10.0,
+          (c.get_y() * 10.0).round() / 10.0,
+          (c.get_z() * 100.0).round() / 100.0,
+          0.0
+        );
+        assert_eq!(p, color(n1, n2, n3));
+      };
+
   });
 }
 // Declares a before handler function named `a_before_fn`
