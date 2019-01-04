@@ -1,5 +1,4 @@
 use crate::tuple::*;
-use std::fmt;
 
 #[derive(Debug, PartialEq)]
 pub struct Canvas {
@@ -58,6 +57,25 @@ impl Canvas {
     }
   }
 
+  fn fix_line(line: &String) -> String {
+    let v:Vec<&str> = line.split_terminator(' ').collect();
+    let mut pctr = 0;
+    let mut result = String::with_capacity(70);
+    for p in v.iter() {
+      result.push_str(p);
+      pctr += 1;
+      if p.ends_with('\n') {
+        pctr = 0;
+      } else if (pctr+1) * 4 >= 70 {
+        result.push('\n');
+        pctr = 0;
+      } else {
+        result.push(' ');
+      }
+    }
+    result
+  } 
+
   /// Return a string representation of the canvas in PPM format
   pub fn canvas_to_ppm(&self) -> String {
     let capacity = self.width * self.height * 4;
@@ -75,10 +93,9 @@ impl Canvas {
           terminator);
         line.push_str(&pixelvals);
       }
-      if line.len() > 70 {
-        
-      }
-      body.push_str(&line);
+      let pline = Canvas::fix_line(&line);
+      body.push_str(&pline);
+      line.clear();
     }
     header + &body
   }

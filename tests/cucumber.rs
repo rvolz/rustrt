@@ -271,7 +271,7 @@ mod tuple_steps {
 
 mod canvas_steps {
   use super::*;
-  use rustrt::tuple::{tuple,point,vector,color};
+  use rustrt::tuple::{color};
   // Any type that implements cucumber_rust::World + Default can be the world
   steps!(MyWorld => {
     given regex "c ← canvas\\(([0-9]+), ([0-9]+)\\)" (i32,i32) |world, w, h, _step| {
@@ -342,8 +342,12 @@ mod canvas_steps {
     then "lines 4-7 of ppm are" |world, step| {
       let txt = step.docstring().unwrap();
       let header:Vec<&str> = world.ppm.split('\n').collect();
-      assert_eq!(&header[3..6].join("\n"), txt);
+      assert_eq!(&header[3..7].join("\n"), txt);
     }; 
+
+    then "the last character of ppm is a newline" |world, _step| {
+      assert!(world.ppm.ends_with('\n'));
+    };
   });
 }
 
