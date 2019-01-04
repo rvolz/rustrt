@@ -1,7 +1,7 @@
 [package]
 name = "rustrt"
 version = "0.1.0"
-authors = ["Rainer Volz <rainer.volz@storema.de>"]
+authors = ["Rainer Volz <dev@textmulch.de>"]
 edition = "2018"
 
 [[test]]

@@ -1,7 +1,8 @@
 #[macro_use]
 extern crate cucumber_rust;
 extern crate rustrt;
-use rustrt::tuple::{Tuple, tuple};
+use rustrt::tuple::{Tuple, tuple, color};
+use rustrt::canvas::{Canvas, canvas};
 
 pub struct MyWorld {
   // You can use this struct for mutable context in scenarios.
@@ -12,6 +13,7 @@ pub struct MyWorld {
   c: Tuple,
   c1: Tuple,
   c2: Tuple,
+  c3: Tuple,
   p: Tuple,
   p1: Tuple,
   p2: Tuple,
@@ -19,7 +21,10 @@ pub struct MyWorld {
   v1: Tuple,
   v2: Tuple,
   zero: Tuple,
-  norm: Tuple
+  norm: Tuple,
+  cc: Canvas,
+  red: Tuple,
+  ppm: String
 }
 
 impl cucumber_rust::World for MyWorld {}
@@ -34,6 +39,7 @@ impl std::default::Default for MyWorld {
         c: tuple(0.0,0.0,0.0,0.0),
         c1: tuple(0.0,0.0,0.0,0.0),
         c2: tuple(0.0,0.0,0.0,0.0),
+        c3: tuple(0.0,0.0,0.0,0.0),
         p: tuple(0.0,0.0,0.0,0.0),
         p1: tuple(0.0,0.0,0.0,0.0),
         p2: tuple(0.0,0.0,0.0,0.0),
@@ -42,6 +48,9 @@ impl std::default::Default for MyWorld {
         v2: tuple(0.0,0.0,0.0,0.0),
         zero: tuple(0.0,0.0,0.0,0.0),
         norm: tuple(0.0,0.0,0.0,0.0),
+        cc: canvas(0,0),
+        red: color(1.0,0.0,0.0),
+        ppm: String::new()
     }
   }
 }
@@ -101,7 +110,8 @@ mod tuple_steps {
       };
       given regex "c1 ← color\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64,f64,f64) |world, n1, n2, n3, _step| {
         world.c1 = color(n1, n2, n3);
-      };given regex "c2 ← color\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64,f64,f64) |world, n1, n2, n3, _step| {
+      };
+      given regex "c2 ← color\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64,f64,f64) |world, n1, n2, n3, _step| {
         world.c2 = color(n1, n2, n3);
       };
 
@@ -258,6 +268,85 @@ mod tuple_steps {
 
   });
 }
+
+mod canvas_steps {
+  use super::*;
+  use rustrt::tuple::{tuple,point,vector,color};
+  // Any type that implements cucumber_rust::World + Default can be the world
+  steps!(MyWorld => {
+    given regex "c ← canvas\\(([0-9]+), ([0-9]+)\\)" (i32,i32) |world, w, h, _step| {
+      world.cc = canvas(w,h);  
+    };
+
+    given "red ← color(1, 0, 0)" |world, _step| {
+     world.red = color(1.0,0.0,0.0);
+    };
+
+    given regex "c3 ← color\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64,f64,f64) |world, n1, n2, n3, _step| {
+      world.c3 = color(n1, n2, n3);
+    };
+
+
+    when regex "write_pixel\\(c, ([0-9]+), ([0-9]+), ([a-z0-9]+)\\)" (i32, i32, String) |world, x, y, c, _step| {
+      let color;
+      match c.as_ref() {
+        "red" => color = world.red,
+        "c1" => color = world.c1,
+        "c2" => color = world.c2,
+        "c3" => color = world.c3,
+        _ => panic!("Unkonw color!")
+      }
+      world.cc.write_pixel(x,y,color);
+    };
+
+    when "ppm ← canvas_to_ppm(c)" |world, _step| {
+      world.ppm = world.cc.canvas_to_ppm();
+    };
+
+    when "every pixel of c is set to color(1, 0.8, 0.6)" |world, _step| {
+      let c = color(1.0,0.8,0.6);
+      world.cc.clear_to_color(c);
+    };
+
+    then "c.width = 10"  |world, _step| {
+      assert_eq!(world.cc.width(), &10);
+    };
+
+    then "c.height = 20" |world, _step| {
+      assert_eq!(world.cc.height(), &20);
+    };
+
+    then "every pixel of c is color(0, 0, 0)" |world, _step| {
+      let black = color(0.0,0.0,0.0);
+      for pixel in world.cc.pixels() {
+        assert_eq!(pixel, &black);
+      }
+    };
+
+    then "pixel_at(c, 2, 3) = red" |world, _step| {
+      assert_eq!(world.cc.pixel_at(2,3), world.red);
+    };
+
+    then "lines 1-3 of ppm are" |world, step| {
+      let txt = step.docstring().unwrap();
+      let header:Vec<&str> = world.ppm.split('\n').collect();
+      assert_eq!(&header[0..3].join("\n"), txt);
+    };
+
+    then "lines 4-6 of ppm are" |world, step| {
+      let txt = step.docstring().unwrap();
+      let header:Vec<&str> = world.ppm.split('\n').collect();
+      assert_eq!(&header[3..6].join("\n"), txt);
+    }; 
+
+    then "lines 4-7 of ppm are" |world, step| {
+      let txt = step.docstring().unwrap();
+      let header:Vec<&str> = world.ppm.split('\n').collect();
+      assert_eq!(&header[3..6].join("\n"), txt);
+    }; 
+  });
+}
+
 // Declares a before handler function named `a_before_fn`
 before!(a_before_fn => |_scenario| {
 
@@ -277,7 +366,8 @@ cucumber! {
   features: "./features", // Path to our feature files
   world: MyWorld, // The world needs to be the same for steps and the main cucumber call
   steps: &[
-      tuple_steps::steps
+      tuple_steps::steps,
+      canvas_steps::steps
   ],
   setup: setup, // Optional; called once before everything
   before: &[

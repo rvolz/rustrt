@@ -1,4 +1,5 @@
 pub mod tuple;
+pub mod canvas;
 
 use crate::tuple::*;
 pub struct Projectile {
