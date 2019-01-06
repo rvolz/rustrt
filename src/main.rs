@@ -1,5 +1,6 @@
 pub mod tuple;
 pub mod canvas;
+pub mod matrix;
 
 use std::fs;
 use crate::tuple::*;

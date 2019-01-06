@@ -3,6 +3,7 @@ extern crate cucumber_rust;
 extern crate rustrt;
 use rustrt::tuple::{Tuple, tuple, color};
 use rustrt::canvas::{Canvas, canvas};
+use rustrt::matrix::{Matrix, matrix, id4};
 
 pub struct MyWorld {
   // You can use this struct for mutable context in scenarios.
@@ -24,7 +25,10 @@ pub struct MyWorld {
   norm: Tuple,
   cc: Canvas,
   red: Tuple,
-  ppm: String
+  ppm: String,
+  m: Matrix,
+  ma: Matrix,
+  mb: Matrix
 }
 
 impl cucumber_rust::World for MyWorld {}
@@ -50,7 +54,10 @@ impl std::default::Default for MyWorld {
         norm: tuple(0.0,0.0,0.0,0.0),
         cc: canvas(0,0),
         red: color(1.0,0.0,0.0),
-        ppm: String::new()
+        ppm: String::new(),
+        m: matrix(0,0),
+        ma: matrix(0,0),
+        mb: matrix(0,0)
     }
   }
 }
@@ -351,6 +358,87 @@ mod canvas_steps {
   });
 }
 
+mod matrix_steps {
+  use super::*;
+  use rustrt::matrix::{matrix};
+  steps!(MyWorld => {
+    given regex "the following (\\d)x(\\d) matrix M:" (usize,usize) |world,rows,columns,step| {
+      let table = step.table().unwrap();
+      world.m = matrix(rows as u32,columns as u32);
+      for row in 0..rows {
+        for column in 0..columns {
+          world.m[(row as u32,column as u32)] = table.rows[row][column].parse::<f64>().unwrap();
+        }
+      }
+    };
+    given regex "the following matrix (\\w):" (char) |world, mname, step| {
+      let table = step.table().unwrap();
+      let rows = table.rows.len();
+      let columns = table.rows.len();
+      let mw;
+      if mname == 'A' {
+        world.ma = matrix(rows as u32,columns as u32);
+        mw = &mut world.ma;
+      } else {
+        world.mb = matrix(rows as u32,columns as u32);
+        mw = &mut world.mb;
+      }
+      for row in 0..rows {
+        for column in 0..columns {
+          mw[(row as u32,column as u32)] = table.rows[row][column].parse::<f64>().unwrap();
+        }
+      }
+    };
+    given regex "b ← tuple\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64,f64,f64,f64) |world, n1, n2, n3, n4, _step| {
+      world.b = tuple(n1, n2, n3, n4);
+    };
+    given "A ← transpose(identity_matrix)" |world,_step| {
+      world.ma = id4().transpose();
+    };
+    then regex "M\\[(\\d+),(\\d+)\\] = ([-+]?[0-9]*\\.?[0-9]+)" (u32,u32,f64) |world,x,y,value,_step| {
+      assert_eq!(world.m[(x,y)], value);
+    };
+    then "A = B" |world, _step| {
+      assert_eq!(world.ma, world.mb);
+    };
+    then "A != B" |world, _step| {
+      assert_ne!(world.ma, world.mb);
+    };
+    then regex "A \\* B is the following (\\d)x(\\d) matrix:" (usize,usize) |world,rows,columns,step| {
+      let table = step.table().unwrap();
+      world.m = matrix(rows as u32,columns as u32);
+      for row in 0..rows {
+        for column in 0..columns {
+          world.m[(row as u32,column as u32)] = table.rows[row][column].parse::<f64>().unwrap();
+        }
+      }
+      assert_eq!(&world.ma * &world.mb, world.m);
+    };
+    then regex "A \\* b = tuple\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64,f64,f64,f64) |world, n1, n2, n3, n4, _step| {
+      assert_eq!(&world.ma * &world.b, tuple(n1, n2, n3, n4));
+    };
+    then "A * identity_matrix = A" |world,_step| {
+      assert_eq!(&world.ma * &id4(), world.ma);
+    };
+    then "identity_matrix * a = a" |world,_step| {
+      assert_eq!(&id4() * &world.a, world.a);
+    };
+    then "transpose(A) is the following matrix:" |world,step| {
+      let table = step.table().unwrap();
+      world.m = matrix(4,4);
+      for row in 0..4 {
+        for column in 0..4 {
+          world.m[(row as u32,column as u32)] = table.rows[row][column].parse::<f64>().unwrap();
+        }
+      }
+      assert_eq!(world.ma.transpose(), world.m);
+    };
+    then "A = identity_matrix" |world,_step| {
+      assert_eq!(world.ma, id4());
+    };
+  });
+}
+
 // Declares a before handler function named `a_before_fn`
 before!(a_before_fn => |_scenario| {
 
@@ -371,7 +459,8 @@ cucumber! {
   world: MyWorld, // The world needs to be the same for steps and the main cucumber call
   steps: &[
       tuple_steps::steps,
-      canvas_steps::steps
+      canvas_steps::steps,
+      matrix_steps::steps
   ],
   setup: setup, // Optional; called once before everything
   before: &[

@@ -17,3 +17,7 @@ To run specific features use the filter flag:
 ```
 cargo test --test cucumber -- -f "features/tup*"
 ```
+
+## Notes
+
+* The matrices.feature had to be changed, because cucumber_rust/gherkin_rust can't deal with tables without headers currently (0.5.1/0.4.1).

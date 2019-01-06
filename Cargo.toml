@@ -9,9 +9,10 @@ name = "cucumber"
 harness = false # Allows Cucumber to print output instead of libtest
 
 [dependencies]
+float-cmp = "^0.4"
 
 [dev-dependencies]
-cucumber_rust = "^0.5.1"
+cucumber_rust = "^0.5"
 
 [features]
 default = ["nightly"]
