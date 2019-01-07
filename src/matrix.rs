@@ -1,13 +1,13 @@
 use float_cmp::{ApproxEq};
 use std::ops::{Index, IndexMut, Mul};
-use std::f64;
+use std::f32;
 use crate::tuple::{Tuple,tuple};
 
 #[derive(Debug, Clone)]
 pub struct Matrix {
   columns: u32,
   rows: u32,
-  data: Vec<f64>
+  data: Vec<f32>
 }
 
 pub fn matrix(columns:u32, rows:u32) -> Matrix {  
@@ -29,11 +29,11 @@ pub fn id4() -> Matrix {
 impl Matrix {
   pub fn columns(&self) -> &u32 {&self.columns}
   pub fn rows(&self) -> &u32 {&self.rows}
-  pub fn cofactor(&self,row: usize, col: usize) -> f64 {
+  pub fn cofactor(&self,row: usize, col: usize) -> f32 {
     let minor = self.minor(row, col);
     if (row+col)%2 == 0 { minor } else { -minor }
   }
-  pub fn determinant(&self) -> f64 {
+  pub fn determinant(&self) -> f32 {
     if self.rows == 2 {
       self[(0,0)]*self[(1,1)] - self[(0,1)]*self[(1,0)]
     } else {
@@ -58,7 +58,7 @@ impl Matrix {
     self.determinant() != 0.0
   }
   // determinant of a submatrix
-  pub fn minor(&self,row: usize, col: usize) -> f64 {
+  pub fn minor(&self,row: usize, col: usize) -> f32 {
     let subm = self.submatrix(row,col);
     subm.determinant()
   }
@@ -92,9 +92,9 @@ impl Matrix {
 }
 
 impl Index<(u32,u32)> for Matrix {
-  type Output = f64;
+  type Output = f32;
 
-  fn index(&self, pos:(u32,u32)) -> &f64 {
+  fn index(&self, pos:(u32,u32)) -> &f32 {
     let row = pos.0;
     let col = pos.1;
     if row >= self.rows || col >= self.columns {
@@ -107,7 +107,7 @@ impl Index<(u32,u32)> for Matrix {
 }
 impl IndexMut<(u32,u32)> for Matrix {
 
-  fn index_mut(&mut self, pos:(u32,u32)) -> &mut f64 {
+  fn index_mut(&mut self, pos:(u32,u32)) -> &mut f32 {
     let row = pos.0;
     let col = pos.1;
     if row >= self.rows || col >= self.columns {
@@ -160,7 +160,7 @@ impl PartialEq for Matrix {
       for row in 0..self.rows {
         for column in 0..self.columns {
           let index = (row*self.columns+column) as usize;
-          if !self.data[index].approx_eq(&other.data[index], 2.0 * ::std::f64::EPSILON, 10) {
+          if !self.data[index].approx_eq(&other.data[index], 2.0 * ::std::f32::EPSILON, 10) {
             return false
           }
         }
@@ -173,9 +173,9 @@ impl PartialEq for Matrix {
 }
 
 impl ApproxEq for Matrix {
-  type Flt = f64;
+  type Flt = f32;
 
-  fn approx_eq(&self, other: &Matrix, epsilon: f64, ulps: i64) -> bool {
+  fn approx_eq(&self, other: &Matrix, epsilon: f32, ulps: i32) -> bool {
     if self.rows == other.rows && self.columns == other.columns {
       for row in 0..self.rows {
         for column in 0..self.columns {

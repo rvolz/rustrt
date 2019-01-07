@@ -4,6 +4,7 @@ extern crate rustrt;
 use rustrt::tuple::{Tuple, tuple, color};
 use rustrt::canvas::{Canvas, canvas};
 use rustrt::matrix::{Matrix, matrix, id4};
+use float_cmp::{ApproxEq};
 
 pub struct MyWorld {
   // You can use this struct for mutable context in scenarios.
@@ -28,7 +29,8 @@ pub struct MyWorld {
   ppm: String,
   m: Matrix,
   ma: Matrix,
-  mb: Matrix
+  mb: Matrix,
+  mc: Matrix
 }
 
 impl cucumber_rust::World for MyWorld {}
@@ -57,7 +59,8 @@ impl std::default::Default for MyWorld {
         ppm: String::new(),
         m: matrix(0,0),
         ma: matrix(0,0),
-        mb: matrix(0,0)
+        mb: matrix(0,0),
+        mc: matrix(0,0)
     }
   }
 }
@@ -67,58 +70,58 @@ mod tuple_steps {
   use rustrt::tuple::{tuple,point,vector,color};
   // Any type that implements cucumber_rust::World + Default can be the world
   steps!(MyWorld => {
-      given regex "a ← tuple\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64,f64,f64,f64) |world, n1, n2, n3, n4, _step| {
+      given regex "a ← tuple\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f32,f32,f32,f32) |world, n1, n2, n3, n4, _step| {
         world.a = tuple(n1, n2, n3, n4);
       };
 
-      given regex "a1 ← tuple\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64,f64,f64,f64) |world, n1, n2, n3, n4, _step| {
+      given regex "a1 ← tuple\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f32,f32,f32,f32) |world, n1, n2, n3, n4, _step| {
         world.a1 = tuple(n1, n2, n3, n4);
       };
-      given regex "a2 ← tuple\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64,f64,f64,f64) |world, n1, n2, n3, n4, _step| {
+      given regex "a2 ← tuple\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f32,f32,f32,f32) |world, n1, n2, n3, n4, _step| {
         world.a2 = tuple(n1, n2, n3, n4);
       };
 
-      given regex "p ← point\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64,f64,f64) |world, n1, n2, n3, _step| {
+      given regex "p ← point\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f32,f32,f32) |world, n1, n2, n3, _step| {
         world.p = point(n1, n2, n3);
       };
 
-      given regex "p1 ← point\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64,f64,f64) |world, n1, n2, n3, _step| {
+      given regex "p1 ← point\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f32,f32,f32) |world, n1, n2, n3, _step| {
         world.p1 = point(n1, n2, n3);
       };
-      given regex "p2 ← point\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64,f64,f64) |world, n1, n2, n3, _step| {
+      given regex "p2 ← point\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f32,f32,f32) |world, n1, n2, n3, _step| {
         world.p2 = point(n1, n2, n3);
       };
 
-      given regex "a ← vector\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64,f64,f64) |world, n1, n2, n3, _step| {
+      given regex "a ← vector\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f32,f32,f32) |world, n1, n2, n3, _step| {
         world.a = vector(n1, n2, n3);
       };
 
-      given regex "b ← vector\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64,f64,f64) |world, n1, n2, n3, _step| {
+      given regex "b ← vector\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f32,f32,f32) |world, n1, n2, n3, _step| {
         world.b = vector(n1, n2, n3);
       };
 
-      given regex "v ← vector\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64,f64,f64) |world, n1, n2, n3, _step| {
+      given regex "v ← vector\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f32,f32,f32) |world, n1, n2, n3, _step| {
         world.v = vector(n1, n2, n3);
       };
 
-      given regex "v1 ← vector\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64,f64,f64) |world, n1, n2, n3, _step| {
+      given regex "v1 ← vector\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f32,f32,f32) |world, n1, n2, n3, _step| {
         world.v1 = vector(n1, n2, n3);
       };
-      given regex "v2 ← vector\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64,f64,f64) |world, n1, n2, n3, _step| {
+      given regex "v2 ← vector\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f32,f32,f32) |world, n1, n2, n3, _step| {
         world.v2 = vector(n1, n2, n3);
       };
 
-      given regex "zero ← vector\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64,f64,f64) |world, n1, n2, n3, _step| {
+      given regex "zero ← vector\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f32,f32,f32) |world, n1, n2, n3, _step| {
         world.v = vector(n1, n2, n3);
       };
 
-      given regex "c ← color\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64,f64,f64) |world, n1, n2, n3, _step| {
+      given regex "c ← color\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f32,f32,f32) |world, n1, n2, n3, _step| {
         world.c = color(n1, n2, n3);
       };
-      given regex "c1 ← color\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64,f64,f64) |world, n1, n2, n3, _step| {
+      given regex "c1 ← color\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f32,f32,f32) |world, n1, n2, n3, _step| {
         world.c1 = color(n1, n2, n3);
       };
-      given regex "c2 ← color\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64,f64,f64) |world, n1, n2, n3, _step| {
+      given regex "c2 ← color\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f32,f32,f32) |world, n1, n2, n3, _step| {
         world.c2 = color(n1, n2, n3);
       };
 
@@ -126,19 +129,19 @@ mod tuple_steps {
         world.norm = world.v.normalize();
       };
 
-      then regex "a.x = ([-+]?[0-9]*\\.?[0-9]+)" (f64) |world, number, _step| {
+      then regex "a.x = ([-+]?[0-9]*\\.?[0-9]+)" (f32) |world, number, _step| {
           assert_eq!(world.a.get_x(), &number);
       };
 
-      then regex "a.y = ([-+]?[0-9]*\\.?[0-9]+)" (f64) |world, number, _step| {
+      then regex "a.y = ([-+]?[0-9]*\\.?[0-9]+)" (f32) |world, number, _step| {
           assert_eq!(world.a.get_y(), &number);
       };
 
-      then regex "a.z = ([-+]?[0-9]*\\.?[0-9]+)" (f64) |world, number, _step| {
+      then regex "a.z = ([-+]?[0-9]*\\.?[0-9]+)" (f32) |world, number, _step| {
           assert_eq!(world.a.get_z(), &number);
       };
 
-      then regex "a.w = ([-+]?[0-9]*\\.?[0-9]+)" (f64) |world, number, _step| {
+      then regex "a.w = ([-+]?[0-9]*\\.?[0-9]+)" (f32) |world, number, _step| {
           assert_eq!(world.a.get_w(), &number);
       };
 
@@ -158,71 +161,71 @@ mod tuple_steps {
         assert!(!world.a.is_vector());
       };
 
-      then regex "-a = tuple\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64,f64,f64,f64) |world, n1, n2, n3, n4, _step| {
+      then regex "-a = tuple\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f32,f32,f32,f32) |world, n1, n2, n3, n4, _step| {
         assert_eq!(-world.a, tuple(n1, n2, n3, n4));
       };
 
-      then regex "p = tuple\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64,f64,f64,f64) |world, n1, n2, n3, n4, _step| {
+      then regex "p = tuple\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f32,f32,f32,f32) |world, n1, n2, n3, n4, _step| {
         assert_eq!(world.p, tuple(n1, n2, n3, n4));
       };
 
-      then regex "v = tuple\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64,f64,f64,f64) |world, n1, n2, n3, n4, _step| {
+      then regex "v = tuple\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f32,f32,f32,f32) |world, n1, n2, n3, n4, _step| {
         assert_eq!(world.v, tuple(n1, n2, n3, n4));
       };
 
-      then regex "a1 \\+ a2 = tuple\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64,f64,f64,f64) |world, n1, n2, n3, n4, _step| {
+      then regex "a1 \\+ a2 = tuple\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f32,f32,f32,f32) |world, n1, n2, n3, n4, _step| {
         assert_eq!(world.a1 + world.a2, tuple(n1, n2, n3, n4));
       };
 
-      then regex "p1 \\- p2 = vector\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64,f64,f64) |world, n1, n2, n3, _step| {
+      then regex "p1 \\- p2 = vector\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f32,f32,f32) |world, n1, n2, n3, _step| {
         assert_eq!(world.p1 - world.p2, vector(n1, n2, n3));
       };
 
-      then regex "p \\- v = point\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64,f64,f64) |world, n1, n2, n3, _step| {
+      then regex "p \\- v = point\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f32,f32,f32) |world, n1, n2, n3, _step| {
         assert_eq!(world.p - world.v, point(n1, n2, n3));
       };
 
-      then regex "v1 \\- v2 = vector\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64,f64,f64) |world, n1, n2, n3, _step| {
+      then regex "v1 \\- v2 = vector\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f32,f32,f32) |world, n1, n2, n3, _step| {
         assert_eq!(world.v1 - world.v2, vector(n1, n2, n3));
       };
 
-      then regex "zero \\- v = vector\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64,f64,f64) |world, n1, n2, n3, _step| {
+      then regex "zero \\- v = vector\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f32,f32,f32) |world, n1, n2, n3, _step| {
         assert_eq!(world.zero - world.v, vector(n1, n2, n3));
       };
 
-      then regex "a \\* ([-+]?[0-9]*\\.?[0-9]+) = tuple\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64, f64,f64,f64,f64) |world, scalar, n1, n2, n3, n4, _step| {
+      then regex "a \\* ([-+]?[0-9]*\\.?[0-9]+) = tuple\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f32, f32,f32,f32,f32) |world, scalar, n1, n2, n3, n4, _step| {
         assert_eq!(world.a * scalar, tuple(n1, n2, n3, n4));
       };
 
-      then regex "a / ([-+]?[0-9]*\\.?[0-9]+) = tuple\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64, f64,f64,f64,f64) |world, scalar, n1, n2, n3, n4, _step| {
+      then regex "a / ([-+]?[0-9]*\\.?[0-9]+) = tuple\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f32, f32,f32,f32,f32) |world, scalar, n1, n2, n3, n4, _step| {
         assert_eq!(world.a / scalar, tuple(n1, n2, n3, n4));
       };
 
-      then regex "magnitude\\(v\\) = ([-+]?[0-9]*\\.?[0-9]+)" (f64) |world, number, _step| {
+      then regex "magnitude\\(v\\) = ([-+]?[0-9]*\\.?[0-9]+)" (f32) |world, number, _step| {
         assert_eq!(world.v.magnitude(), number);
       };
 
-      then regex "magnitude\\(norm\\) = ([-+]?[0-9]*\\.?[0-9]+)" (f64) |world, number, _step| {
+      then regex "magnitude\\(norm\\) = ([-+]?[0-9]*\\.?[0-9]+)" (f32) |world, number, _step| {
         assert_eq!(world.norm.magnitude(), number);
       };
 
       then "magnitude(v) = √14" |world, _step| {
-        assert_eq!(world.v.magnitude(), 14f64.sqrt());
+        assert_eq!(world.v.magnitude(), 14f32.sqrt());
       };
 
       then "normalize(v) = vector(1, 0, 0)" |world, _step| {
-        assert_eq!(world.v.normalize(), vector(1f64,0f64,0f64));
+        assert_eq!(world.v.normalize(), vector(1f32,0f32,0f32));
       };
 
       then "normalize(v) = approximately vector(0.26726, 0.53452, 0.80178)" |world, _step| {
-        assert_eq!(world.v.normalize(), vector(world.v.get_x()/14f64.sqrt(), world.v.get_y()/14f64.sqrt(), world.v.get_z()/14f64.sqrt()));
+        assert_eq!(world.v.normalize(), vector(world.v.get_x()/14f32.sqrt(), world.v.get_y()/14f32.sqrt(), world.v.get_z()/14f32.sqrt()));
       };
 
-      then regex "dot\\(a, b\\) = ([-+]?[0-9]*\\.?[0-9]+)" (f64) |world, number, _step| {
+      then regex "dot\\(a, b\\) = ([-+]?[0-9]*\\.?[0-9]+)" (f32) |world, number, _step| {
         assert_eq!(world.a.dot(world.b), number);
       };
       
-      then regex "cross\\(([a-z]), ([a-z])\\) = vector\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (String, String, f64,f64,f64) |world, a1, _b1, n1, n2, n3, _step| {
+      then regex "cross\\(([a-z]), ([a-z])\\) = vector\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (String, String, f32,f32,f32) |world, a1, _b1, n1, n2, n3, _step| {
         if a1 == "a" {
           assert_eq!(world.a.cross(world.b), vector(n1,n2,n3));
         } else {
@@ -230,8 +233,8 @@ mod tuple_steps {
         }
       };
 
-      then regex "c.([a-z]+) = ([-+]?[0-9]*\\.?[0-9]+)" (String,f64) |world, color, number, _step| {
-        let mut result = &0.0f64;
+      then regex "c.([a-z]+) = ([-+]?[0-9]*\\.?[0-9]+)" (String,f32) |world, color, number, _step| {
+        let mut result = &0.0f32;
         match color.as_ref() {
           "red" => result = world.c.red(),
           "green" => result = world.c.green(),
@@ -241,11 +244,11 @@ mod tuple_steps {
         assert_eq!(result, &number);
       };
 
-      then regex "c1 \\+ c2 = color\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64,f64,f64) |world, n1, n2, n3, _step| {
+      then regex "c1 \\+ c2 = color\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f32,f32,f32) |world, n1, n2, n3, _step| {
         assert_eq!(world.c1 + world.c2, color(n1, n2, n3));
       };
 
-      then regex "c1 \\- c2 = color\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64,f64,f64) |world, n1, n2, n3, _step| {
+      then regex "c1 \\- c2 = color\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f32,f32,f32) |world, n1, n2, n3, _step| {
         // due to rounding problems
         let c: Tuple = world.c1 - world.c2;
         let p = tuple(
@@ -257,11 +260,11 @@ mod tuple_steps {
         assert_eq!(p, color(n1, n2, n3));
       };
 
-      then regex "c \\* ([-+]?[0-9]*\\.?[0-9]+) = color\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64, f64,f64,f64) |world, scalar, n1, n2, n3, _step| {
+      then regex "c \\* ([-+]?[0-9]*\\.?[0-9]+) = color\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f32, f32,f32,f32) |world, scalar, n1, n2, n3, _step| {
         assert_eq!(world.c * scalar, color(n1, n2, n3));
       };
 
-      then regex "c1 \\* c2 = color\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64,f64,f64) |world, n1, n2, n3, _step| {
+      then regex "c1 \\* c2 = color\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f32,f32,f32) |world, n1, n2, n3, _step| {
         // due to rounding problems
         let c: Tuple = world.c1 * world.c2;
         let p = tuple(
@@ -289,7 +292,7 @@ mod canvas_steps {
      world.red = color(1.0,0.0,0.0);
     };
 
-    given regex "c3 ← color\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64,f64,f64) |world, n1, n2, n3, _step| {
+    given regex "c3 ← color\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f32,f32,f32) |world, n1, n2, n3, _step| {
       world.c3 = color(n1, n2, n3);
     };
 
@@ -368,13 +371,16 @@ mod matrix_steps {
       if mname == 'A' {
         world.ma = matrix(rows as u32,columns as u32);
         mw = &mut world.ma;
+      } else if mname == 'B' {
+        world.mb = matrix(rows as u32,columns as u32);
+        mw = &mut world.mb;
       } else {
         world.m = matrix(rows as u32,columns as u32);
         mw = &mut world.m;
       }
       for row in 0..rows {
         for column in 0..columns {
-          mw[(row as u32,column as u32)] = table.rows[row][column].parse::<f64>().unwrap();
+          mw[(row as u32,column as u32)] = table.rows[row][column].parse::<f32>().unwrap();
         }
       }
     };
@@ -392,11 +398,11 @@ mod matrix_steps {
       }
       for row in 0..rows {
         for column in 0..columns {
-          mw[(row as u32,column as u32)] = table.rows[row][column].parse::<f64>().unwrap();
+          mw[(row as u32,column as u32)] = table.rows[row][column].parse::<f32>().unwrap();
         }
       }
     };
-    given regex "b ← tuple\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64,f64,f64,f64) |world, n1, n2, n3, n4, _step| {
+    given regex "b ← tuple\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f32,f32,f32,f32) |world, n1, n2, n3, n4, _step| {
       world.b = tuple(n1, n2, n3, n4);
     };
     given "A ← transpose(identity_matrix)" |world,_step| {
@@ -408,7 +414,10 @@ mod matrix_steps {
     given "B ← inverse(A)" |world,_step| {
       world.mb = world.ma.inverse();
     };
-    then regex "M\\[(\\d+),(\\d+)\\] = ([-+]?[0-9]*\\.?[0-9]+)" (u32,u32,f64) |world,x,y,value,_step| {
+    given "C ← A * B" |world,_step| {
+      world.mc = &world.ma * &world.mb;
+    };
+    then regex "M\\[(\\d+),(\\d+)\\] = ([-+]?[0-9]*\\.?[0-9]+)" (u32,u32,f32) |world,x,y,value,_step| {
       assert_eq!(world.m[(x,y)], value);
     };
     then "A = B" |world, _step| {
@@ -422,12 +431,12 @@ mod matrix_steps {
       world.m = matrix(rows as u32,columns as u32);
       for row in 0..rows {
         for column in 0..columns {
-          world.m[(row as u32,column as u32)] = table.rows[row][column].parse::<f64>().unwrap();
+          world.m[(row as u32,column as u32)] = table.rows[row][column].parse::<f32>().unwrap();
         }
       }
       assert_eq!(&world.ma * &world.mb, world.m);
     };
-    then regex "A \\* b = tuple\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f64,f64,f64,f64) |world, n1, n2, n3, n4, _step| {
+    then regex "A \\* b = tuple\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f32,f32,f32,f32) |world, n1, n2, n3, n4, _step| {
       assert_eq!(&world.ma * &world.b, tuple(n1, n2, n3, n4));
     };
     then "A * identity_matrix = A" |world,_step| {
@@ -441,7 +450,7 @@ mod matrix_steps {
       world.m = matrix(4,4);
       for row in 0..4 {
         for column in 0..4 {
-          world.m[(row as u32,column as u32)] = table.rows[row][column].parse::<f64>().unwrap();
+          world.m[(row as u32,column as u32)] = table.rows[row][column].parse::<f32>().unwrap();
         }
       }
       assert_eq!(world.ma.transpose(), world.m);
@@ -449,7 +458,7 @@ mod matrix_steps {
     then "A = identity_matrix" |world,_step| {
       assert_eq!(world.ma, id4());
     };
-    then regex "determinant\\((\\w)\\) = (([-+]?[0-9]*\\.?[0-9]+))" (char,f64) |world,mname,result,_step| {
+    then regex "determinant\\((\\w)\\) = (([-+]?[0-9]*\\.?[0-9]+))" (char,f32) |world,mname,result,_step| {
       let mw;
       if mname == 'A' {
         mw = &mut world.ma;
@@ -463,7 +472,7 @@ mod matrix_steps {
       world.m = matrix(rows as u32,columns as u32);
       for row in 0..rows {
         for column in 0..columns {
-          world.m[(row as u32,column as u32)] = table.rows[row][column].parse::<f64>().unwrap();
+          world.m[(row as u32,column as u32)] = table.rows[row][column].parse::<f32>().unwrap();
         }
       }
       let mw;
@@ -474,7 +483,7 @@ mod matrix_steps {
       }
       assert_eq!(mw.submatrix(row,column), world.m);
     };
-    then regex "minor\\((\\w), (\\d), (\\d)\\) = (([-+]?[0-9]*\\.?[0-9]+))" (char,usize,usize,f64) |world,mname,row,col,result,_step| {
+    then regex "minor\\((\\w), (\\d), (\\d)\\) = (([-+]?[0-9]*\\.?[0-9]+))" (char,usize,usize,f32) |world,mname,row,col,result,_step| {
       let mw;
       if mname == 'A' {
         mw = &mut world.ma;
@@ -483,7 +492,7 @@ mod matrix_steps {
       }
       assert_eq!(mw.minor(row,col), result);
     };
-    then regex "cofactor\\((\\w), (\\d), (\\d)\\) = (([-+]?[0-9]*\\.?[0-9]+))" (char,usize,usize,f64) |world,mname,row,col,result,_step| {
+    then regex "cofactor\\((\\w), (\\d), (\\d)\\) = (([-+]?[0-9]*\\.?[0-9]+))" (char,usize,usize,f32) |world,mname,row,col,result,_step| {
       let mw;
       if mname == 'A' {
         mw = &mut world.ma;
@@ -498,7 +507,7 @@ mod matrix_steps {
     then "A is not invertible" |world, _step| {
       assert!(!world.ma.is_invertible())
     };
-    then regex "B\\[(\\d),(\\d)\\] = (-?\\d+)/(-?\\d+)" (usize,usize,f64,f64) |world,row,col,x,y,_step| {
+    then regex "B\\[(\\d),(\\d)\\] = (-?\\d+)/(-?\\d+)" (usize,usize,f32,f32) |world,row,col,x,y,_step| {
       assert_eq!(world.mb[(row as u32,col as u32)], x/y);
     };
     then "B is the following 4x4 matrix:" |world,step| {
@@ -506,10 +515,27 @@ mod matrix_steps {
       world.m = matrix(4,4);
       for row in 0..4 {
         for column in 0..4 {
-          world.m[(row as u32,column as u32)] = table.rows[row][column].parse::<f64>().unwrap();
+          world.m[(row as u32,column as u32)] = table.rows[row][column].parse::<f32>().unwrap();
         }
       }
-      assert_eq!(world.mb, world.m);
+      // due to 3-digit precision differences we have to use ULPS 1000 for testing
+      assert!(world.mb.approx_eq(&world.m,2.0 * ::std::f32::EPSILON, 1000));
+    };
+    then "inverse(A) is the following 4x4 matrix:" |world,step| {
+      let table = step.table().unwrap();
+      world.m = matrix(4,4);
+      for row in 0..4 {
+        for column in 0..4 {
+          world.m[(row as u32,column as u32)] = table.rows[row][column].parse::<f32>().unwrap();
+        }
+      }
+      // due to 3-digit precision differences we have to use ULPS 1000-2000 for testing
+      assert!(world.ma.inverse().approx_eq(&world.m,2.0 * ::std::f32::EPSILON, 2000));
+      //assert_eq!(world.ma.inverse(), world.m);
+    };
+    
+    then "C * inverse(B) = A" |world,_step| {
+      assert_eq!(&world.mc * &world.mb.inverse(), world.ma);
     };
   });
 }

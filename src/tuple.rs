@@ -1,27 +1,27 @@
 use std::ops;
-use std::f64;
+use std::f32;
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct Tuple {
-  x: f64,
-  y: f64,
-  z: f64, 
-  w: f64
+  x: f32,
+  y: f32,
+  z: f32, 
+  w: f32
 }
 
-pub fn color(x:f64, y:f64, z:f64) -> Tuple {
+pub fn color(x:f32, y:f32, z:f32) -> Tuple {
   Tuple {x,y,z,w:0.0}
 }
 
-pub fn point(x:f64, y:f64, z:f64) -> Tuple {
+pub fn point(x:f32, y:f32, z:f32) -> Tuple {
   Tuple {x,y,z,w:1.0}
 }
 
-pub fn tuple(x:f64, y:f64, z:f64, w:f64) -> Tuple {
+pub fn tuple(x:f32, y:f32, z:f32, w:f32) -> Tuple {
   Tuple {x,y,z,w}
 }
 
-pub fn vector(x:f64, y:f64, z:f64) -> Tuple {
+pub fn vector(x:f32, y:f32, z:f32) -> Tuple {
   Tuple {x,y,z,w:0.0}
 }
 
@@ -36,13 +36,13 @@ fn is_vector(t: &Tuple) -> bool {
 }
 
 impl Tuple {
-  pub fn get_x(&self) -> &f64 { &self.x }
-  pub fn get_y(&self) -> &f64 { &self.y }
-  pub fn get_z(&self) -> &f64 { &self.z }
-  pub fn get_w(&self) -> &f64 { &self.w }
-  pub fn red(&self) -> &f64 { &self.x }
-  pub fn green(&self) -> &f64 { &self.y }
-  pub fn blue(&self) -> &f64 { &self.z }
+  pub fn get_x(&self) -> &f32 { &self.x }
+  pub fn get_y(&self) -> &f32 { &self.y }
+  pub fn get_z(&self) -> &f32 { &self.z }
+  pub fn get_w(&self) -> &f32 { &self.w }
+  pub fn red(&self) -> &f32 { &self.x }
+  pub fn green(&self) -> &f32 { &self.y }
+  pub fn blue(&self) -> &f32 { &self.z }
   
   /// Computes the cross product of two vectors. Panics with points
   pub fn cross(&self, rhs: Tuple) -> Tuple {
@@ -56,7 +56,7 @@ impl Tuple {
   }
 
   /// Computes the dot product of two vectors. Panics with points
-  pub fn dot(&self, rhs: Tuple) -> f64 {
+  pub fn dot(&self, rhs: Tuple) -> f32 {
     if is_point(&self) || is_point(&rhs) {
       panic!("Dot product is only defined for vectors! left `{:?}`, right `{:?}`", &self, &rhs);
     }
@@ -72,11 +72,11 @@ impl Tuple {
     (&self.w == &0.0)
   }
   /// Determine the magnitude of a vector. Panics if operationg on a point.
-  pub fn magnitude(&self) -> f64 {
+  pub fn magnitude(&self) -> f32 {
     if !is_vector(&self) {
       panic!("Trying to get the magnitude of a non-vector!");
     }
-    let x = self.x.powf(2f64) + self.y.powf(2f64) + self.z.powf(2f64);
+    let x = self.x.powf(2f32) + self.y.powf(2f32) + self.z.powf(2f32);
     x.sqrt()
   }
 
@@ -113,11 +113,11 @@ impl ops::Add for Tuple {
   }
 }
 
-impl ops::Div<f64> for Tuple {
+impl ops::Div<f32> for Tuple {
   type Output = Tuple;
 
   /// Divides a tuple by a scalar value only
-  fn div(self, _rhs: f64) -> Tuple {
+  fn div(self, _rhs: f32) -> Tuple {
     Tuple {
       x: self.x / _rhs,
       y: self.y / _rhs,
@@ -127,11 +127,11 @@ impl ops::Div<f64> for Tuple {
   }
 }
 
-impl ops::Mul<f64> for Tuple {
+impl ops::Mul<f32> for Tuple {
   type Output = Tuple;
 
   /// Multplies a tuple with a scalar value only
-  fn mul(self, _rhs: f64) -> Tuple {
+  fn mul(self, _rhs: f32) -> Tuple {
     Tuple {
       x: self.x * _rhs,
       y: self.y * _rhs,

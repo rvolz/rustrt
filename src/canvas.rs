@@ -49,7 +49,7 @@ impl Canvas {
     self.pixels[index]
   }
 
-  fn scale_color_256(color: f64) -> u8 {
+  fn scale_color_256(color: f32) -> u8 {
     if color < 0.0 {0}
     else if color >= 1.0 {255}
     else {

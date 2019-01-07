@@ -35,7 +35,7 @@ fn exc1() {
     wind: tuple::vector(-0.01, 0.0, 0.0)
   };
   let mut ticks = 0;
-  while p.position.get_y() >= &0.0f64 {
+  while p.position.get_y() >= &0.0f32 {
     p = tick(&e, &p);
     ticks += 1;
     println!("Ticks {:?}, Position {:?}",ticks, p.position)
@@ -43,8 +43,8 @@ fn exc1() {
 }
 
 fn scale_position(width: i32, height: i32, position: Tuple) -> (i32, i32) {
-  let mx = width as f64 / 100.0;
-  let my = height as f64 / 100.0;
+  let mx = width as f32 / 100.0;
+  let my = height as f32 / 100.0;
   let nx = (position.get_x()*mx) as i32;
   let ny = height - (position.get_y()*my) as i32;
   (nx, ny)
@@ -64,7 +64,7 @@ fn exc2() -> std::io::Result<()> {
   let mut c = canvas(1024, 960);
   let red = color(1.0,0.0,0.0);
   let mut ticks = 0;
-  while p.position.get_y() >= &0.0f64 {
+  while p.position.get_y() >= &0.0f32 {
     p = tick(&e, &p);
     ticks += 1;
     println!("Ticks {:?}, Position {:?}",ticks, p.position);
