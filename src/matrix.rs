@@ -29,6 +29,57 @@ pub fn id4() -> Matrix {
 impl Matrix {
   pub fn columns(&self) -> &u32 {&self.columns}
   pub fn rows(&self) -> &u32 {&self.rows}
+  pub fn cofactor(&self,row: usize, col: usize) -> f64 {
+    let minor = self.minor(row, col);
+    if (row+col)%2 == 0 { minor } else { -minor }
+  }
+  pub fn determinant(&self) -> f64 {
+    if self.rows == 2 {
+      self[(0,0)]*self[(1,1)] - self[(0,1)]*self[(1,0)]
+    } else {
+      (0..self.columns).map(|i| self[(0,i)]*self.cofactor(0,i as usize)).sum()
+    }
+  }
+  pub fn inverse(&self) -> Matrix {
+    if !self.is_invertible() {
+      panic!("Trying to invert a non-invertible matrix!");
+    }
+    let mut m = matrix(self.rows, self.columns);
+    for row in 0..self.rows {
+      for col in 0..self.columns {
+        let c = self.cofactor(row as usize,col as usize);
+        m[(col,row)] = c / self.determinant();
+      }
+    }
+    m
+  }
+  pub fn is_invertible(&self) -> bool {
+    // TODO check with approx_eq?
+    self.determinant() != 0.0
+  }
+  // determinant of a submatrix
+  pub fn minor(&self,row: usize, col: usize) -> f64 {
+    let subm = self.submatrix(row,col);
+    subm.determinant()
+  }
+  pub fn submatrix(&self,row: usize, col: usize) -> Matrix {
+    if row as u32 >= self.rows || col as u32 >= self.columns {
+      panic!("Matrix row/col {:?},{:?} out of range {:?},{:?}", 
+        row,col,self.rows(),self.columns());
+    }
+    let mut m = matrix(self.rows-1, self.columns-1);
+    for r in 0..self.rows {
+      for c in 0..self.columns {
+        // is that something to copy?
+        if r != row as u32 && c != col as u32 {
+          let new_r = if r > row as u32 { r-1 } else { r };
+          let new_c = if c > col as u32 { c-1 } else { c };
+          m[(new_r,new_c)] = self[(r,c)];
+        }
+      }
+    }
+    m
+  }
   pub fn transpose(&self) -> Matrix {
     let mut m = matrix(self.rows, self.columns);
     for row in 0..self.rows {

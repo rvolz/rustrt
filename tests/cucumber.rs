@@ -362,12 +362,19 @@ mod matrix_steps {
   use super::*;
   use rustrt::matrix::{matrix};
   steps!(MyWorld => {
-    given regex "the following (\\d)x(\\d) matrix M:" (usize,usize) |world,rows,columns,step| {
+    given regex "the following (\\d)x(\\d) matrix (\\w):" (usize,usize,char) |world,rows,columns,mname,step| {
       let table = step.table().unwrap();
-      world.m = matrix(rows as u32,columns as u32);
+      let mw;
+      if mname == 'A' {
+        world.ma = matrix(rows as u32,columns as u32);
+        mw = &mut world.ma;
+      } else {
+        world.m = matrix(rows as u32,columns as u32);
+        mw = &mut world.m;
+      }
       for row in 0..rows {
         for column in 0..columns {
-          world.m[(row as u32,column as u32)] = table.rows[row][column].parse::<f64>().unwrap();
+          mw[(row as u32,column as u32)] = table.rows[row][column].parse::<f64>().unwrap();
         }
       }
     };
@@ -394,6 +401,12 @@ mod matrix_steps {
     };
     given "A ← transpose(identity_matrix)" |world,_step| {
       world.ma = id4().transpose();
+    };
+    given "B ← submatrix(A, 1, 0)" |world,_step| {
+      world.mb = world.ma.submatrix(1,0);
+    };
+    given "B ← inverse(A)" |world,_step| {
+      world.mb = world.ma.inverse();
     };
     then regex "M\\[(\\d+),(\\d+)\\] = ([-+]?[0-9]*\\.?[0-9]+)" (u32,u32,f64) |world,x,y,value,_step| {
       assert_eq!(world.m[(x,y)], value);
@@ -435,6 +448,68 @@ mod matrix_steps {
     };
     then "A = identity_matrix" |world,_step| {
       assert_eq!(world.ma, id4());
+    };
+    then regex "determinant\\((\\w)\\) = (([-+]?[0-9]*\\.?[0-9]+))" (char,f64) |world,mname,result,_step| {
+      let mw;
+      if mname == 'A' {
+        mw = &mut world.ma;
+      } else {
+        mw = &mut world.mb;
+      }
+      assert_eq!(mw.determinant(), result);
+    };
+    then regex "submatrix\\((\\w), (\\d), (\\d)\\) is the following (\\d)x(\\d) matrix:" (char,usize,usize,usize,usize) |world,mname,row,column,rows,columns,step| {
+      let table = step.table().unwrap();
+      world.m = matrix(rows as u32,columns as u32);
+      for row in 0..rows {
+        for column in 0..columns {
+          world.m[(row as u32,column as u32)] = table.rows[row][column].parse::<f64>().unwrap();
+        }
+      }
+      let mw;
+      if mname == 'A' {
+        mw = &mut world.ma;
+      } else {
+        mw = &mut world.mb;
+      }
+      assert_eq!(mw.submatrix(row,column), world.m);
+    };
+    then regex "minor\\((\\w), (\\d), (\\d)\\) = (([-+]?[0-9]*\\.?[0-9]+))" (char,usize,usize,f64) |world,mname,row,col,result,_step| {
+      let mw;
+      if mname == 'A' {
+        mw = &mut world.ma;
+      } else {
+        mw = &mut world.mb;
+      }
+      assert_eq!(mw.minor(row,col), result);
+    };
+    then regex "cofactor\\((\\w), (\\d), (\\d)\\) = (([-+]?[0-9]*\\.?[0-9]+))" (char,usize,usize,f64) |world,mname,row,col,result,_step| {
+      let mw;
+      if mname == 'A' {
+        mw = &mut world.ma;
+      } else {
+        mw = &mut world.mb;
+      }
+      assert_eq!(mw.cofactor(row,col), result);
+    };
+    then "A is invertible" |world, _step| {
+      assert!(world.ma.is_invertible())
+    };
+    then "A is not invertible" |world, _step| {
+      assert!(!world.ma.is_invertible())
+    };
+    then regex "B\\[(\\d),(\\d)\\] = (-?\\d+)/(-?\\d+)" (usize,usize,f64,f64) |world,row,col,x,y,_step| {
+      assert_eq!(world.mb[(row as u32,col as u32)], x/y);
+    };
+    then "B is the following 4x4 matrix:" |world,step| {
+      let table = step.table().unwrap();
+      world.m = matrix(4,4);
+      for row in 0..4 {
+        for column in 0..4 {
+          world.m[(row as u32,column as u32)] = table.rows[row][column].parse::<f64>().unwrap();
+        }
+      }
+      assert_eq!(world.mb, world.m);
     };
   });
 }
