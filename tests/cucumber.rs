@@ -206,7 +206,7 @@ mod tuple_steps {
       };
 
       then regex "magnitude\\(norm\\) = ([-+]?[0-9]*\\.?[0-9]+)" (f32) |world, number, _step| {
-        assert_eq!(world.norm.magnitude(), number);
+        assert!(world.norm.magnitude().approx_eq(&number, 2.0 * ::std::f32::EPSILON, 10));
       };
 
       then "magnitude(v) = √14" |world, _step| {
