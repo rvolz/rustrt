@@ -1,7 +1,8 @@
 use std::ops;
 use std::f32;
+use float_cmp::{ApproxEq};
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub struct Tuple {
   x: f32,
   y: f32,
@@ -186,6 +187,23 @@ impl ops::Sub for Tuple {
       z: self.z - _rhs.z,
       w: self.w - _rhs.w,
     }
+  }
+}
+
+impl PartialEq for Tuple {
+  fn eq(&self, other: &Tuple) -> bool {
+    self.approx_eq(other, 2.0 * ::std::f32::EPSILON, 10)
+  }
+}
+
+impl ApproxEq for Tuple {
+  type Flt = f32;
+
+  fn approx_eq(&self, other: &Tuple, epsilon: f32, ulps: i32) -> bool {
+    self.x.approx_eq(&other.x, epsilon, ulps) &&
+    self.y.approx_eq(&other.y, epsilon, ulps) &&
+    self.z.approx_eq(&other.z, epsilon, ulps) &&
+    self.w.approx_eq(&other.w, epsilon, ulps)
   }
 }
 
