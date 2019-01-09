@@ -26,6 +26,25 @@ pub fn id4() -> Matrix {
   m
 }
 
+/// A scaling matrix
+pub fn scaling(x:f32, y:f32, z:f32) -> Matrix {
+  let mut m = id4();
+  m[(0,0)] = x;
+  m[(1,1)] = y;
+  m[(2,2)] = z;
+  m[(3,3)] = 1.0;
+  m
+}
+
+/// A translation matrix
+pub fn translation(x:f32, y:f32, z:f32) -> Matrix {
+  let mut m = id4();
+  m[(0,3)] = x;
+  m[(1,3)] = y;
+  m[(2,3)] = z;
+  m
+}
+
 impl Matrix {
   pub fn columns(&self) -> &u32 {&self.columns}
   pub fn rows(&self) -> &u32 {&self.rows}

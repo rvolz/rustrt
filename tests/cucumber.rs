@@ -30,7 +30,9 @@ pub struct MyWorld {
   m: Matrix,
   ma: Matrix,
   mb: Matrix,
-  mc: Matrix
+  mc: Matrix,
+  transform: Matrix,
+  inv: Matrix
 }
 
 impl cucumber_rust::World for MyWorld {}
@@ -60,7 +62,9 @@ impl std::default::Default for MyWorld {
         m: matrix(0,0),
         ma: matrix(0,0),
         mb: matrix(0,0),
-        mc: matrix(0,0)
+        mc: matrix(0,0),
+        transform: matrix(0,0),
+        inv: matrix(0,0)
     }
   }
 }
@@ -540,6 +544,30 @@ mod matrix_steps {
   });
 }
 
+mod transformations_steps {
+  use super::*;
+  use rustrt::tuple::{point};
+  use rustrt::matrix::{translation};
+  // Any type that implements cucumber_rust::World + Default can be the world
+  steps!(MyWorld => {
+    given regex "transform ← translation\\((-?\\d+), (-?\\d+), (-?\\d+)\\)" (f32,f32,f32) |world,x,y,z,_step| {
+      world.transform = translation(x,y,z);
+    };
+    given "inv ← inverse(transform)" |world, _step| {
+      world.inv = world.transform.inverse();
+    };
+    then regex "transform \\* p = point\\((-?\\d+), (-?\\d+), (-?\\d+)\\)" (f32,f32,f32) |world,x,y,z,_step| {
+      assert_eq!(&world.transform * &world.p, point(x,y,z));
+    };
+    then regex "inv \\* p = point\\((-?\\d+), (-?\\d+), (-?\\d+)\\)" (f32,f32,f32) |world,x,y,z,_step| {
+      assert_eq!(&world.inv * &world.p, point(x,y,z));
+    };
+    then "transform * v = v" |world,_step| {
+      assert_eq!(&world.transform * &world.v, world.v);
+    };
+});
+}
+
 // Declares a before handler function named `a_before_fn`
 before!(a_before_fn => |_scenario| {
 
@@ -561,7 +589,8 @@ cucumber! {
   steps: &[
       tuple_steps::steps,
       canvas_steps::steps,
-      matrix_steps::steps
+      matrix_steps::steps,
+      transformations_steps::steps
   ],
   setup: setup, // Optional; called once before everything
   before: &[
