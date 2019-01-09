@@ -546,12 +546,15 @@ mod matrix_steps {
 
 mod transformations_steps {
   use super::*;
-  use rustrt::tuple::{point};
-  use rustrt::matrix::{translation};
+  use rustrt::tuple::{point,vector};
+  use rustrt::matrix::{translation,scaling};
   // Any type that implements cucumber_rust::World + Default can be the world
   steps!(MyWorld => {
     given regex "transform ← translation\\((-?\\d+), (-?\\d+), (-?\\d+)\\)" (f32,f32,f32) |world,x,y,z,_step| {
       world.transform = translation(x,y,z);
+    };
+    given regex "transform ← scaling\\((-?\\d+), (-?\\d+), (-?\\d+)\\)" (f32,f32,f32) |world,x,y,z,_step| {
+      world.transform = scaling(x,y,z);
     };
     given "inv ← inverse(transform)" |world, _step| {
       world.inv = world.transform.inverse();
@@ -559,8 +562,14 @@ mod transformations_steps {
     then regex "transform \\* p = point\\((-?\\d+), (-?\\d+), (-?\\d+)\\)" (f32,f32,f32) |world,x,y,z,_step| {
       assert_eq!(&world.transform * &world.p, point(x,y,z));
     };
+    then regex "transform \\* v = vector\\((-?\\d+), (-?\\d+), (-?\\d+)\\)" (f32,f32,f32) |world,x,y,z,_step| {
+      assert_eq!(&world.transform * &world.v, vector(x,y,z));
+    };
     then regex "inv \\* p = point\\((-?\\d+), (-?\\d+), (-?\\d+)\\)" (f32,f32,f32) |world,x,y,z,_step| {
       assert_eq!(&world.inv * &world.p, point(x,y,z));
+    };
+    then regex "inv \\* v = vector\\((-?\\d+), (-?\\d+), (-?\\d+)\\)" (f32,f32,f32) |world,x,y,z,_step| {
+      assert_eq!(&world.inv * &world.v, vector(x,y,z));
     };
     then "transform * v = v" |world,_step| {
       assert_eq!(&world.transform * &world.v, world.v);
