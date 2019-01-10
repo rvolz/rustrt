@@ -26,6 +26,39 @@ pub fn id4() -> Matrix {
   m
 }
 
+/// Rotation matrix for the x axis
+/// r = radians
+pub fn rotation_x(r:f32) -> Matrix {
+  let mut m = id4();
+  m[(1,1)] = r.cos();
+  m[(1,2)] = -r.sin();
+  m[(2,1)] = r.sin();
+  m[(2,2)] = r.cos();
+  m
+}
+
+/// Rotation matrix for the y axis
+/// r = radians
+pub fn rotation_y(r:f32) -> Matrix {
+  let mut m = id4();
+  m[(0,0)] = r.cos();
+  m[(0,2)] = r.sin();
+  m[(2,0)] = -r.sin();
+  m[(2,2)] = r.cos();
+  m
+}
+
+/// Rotation matrix for the z axis
+/// r = radians
+pub fn rotation_z(r:f32) -> Matrix {
+  let mut m = id4();
+  m[(0,0)] = r.cos();
+  m[(0,1)] = -r.sin();
+  m[(1,0)] = r.sin();
+  m[(1,1)] = r.cos();
+  m
+}
+
 /// A scaling matrix
 pub fn scaling(x:f32, y:f32, z:f32) -> Matrix {
   let mut m = id4();

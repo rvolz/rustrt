@@ -32,7 +32,9 @@ pub struct MyWorld {
   mb: Matrix,
   mc: Matrix,
   transform: Matrix,
-  inv: Matrix
+  inv: Matrix,
+  half_quarter: Matrix,
+  full_quarter: Matrix
 }
 
 impl cucumber_rust::World for MyWorld {}
@@ -64,7 +66,9 @@ impl std::default::Default for MyWorld {
         mb: matrix(0,0),
         mc: matrix(0,0),
         transform: matrix(0,0),
-        inv: matrix(0,0)
+        inv: matrix(0,0),
+        half_quarter: matrix(0,0),
+        full_quarter: matrix(0,0),
     }
   }
 }
@@ -547,7 +551,8 @@ mod matrix_steps {
 mod transformations_steps {
   use super::*;
   use rustrt::tuple::{point,vector};
-  use rustrt::matrix::{translation,scaling};
+  use rustrt::matrix::{translation,scaling,rotation_x,rotation_y,rotation_z};
+  use core::f32::consts::{FRAC_PI_2,FRAC_PI_4,SQRT_2};
   // Any type that implements cucumber_rust::World + Default can be the world
   steps!(MyWorld => {
     given regex "transform ← translation\\((-?\\d+), (-?\\d+), (-?\\d+)\\)" (f32,f32,f32) |world,x,y,z,_step| {
@@ -558,6 +563,27 @@ mod transformations_steps {
     };
     given "inv ← inverse(transform)" |world, _step| {
       world.inv = world.transform.inverse();
+    };
+    given "half_quarter ← rotation_x(π / 4)" |world, _step| {
+      world.half_quarter = rotation_x(FRAC_PI_4);
+    };
+    given "full_quarter ← rotation_x(π / 2)" |world, _step| {
+      world.full_quarter = rotation_x(FRAC_PI_2);
+    };
+    given "half_quarter ← rotation_y(π / 4)" |world, _step| {
+      world.half_quarter = rotation_y(FRAC_PI_4);
+    };
+    given "full_quarter ← rotation_y(π / 2)" |world, _step| {
+      world.full_quarter = rotation_y(FRAC_PI_2);
+    };
+    given "half_quarter ← rotation_z(π / 4)" |world, _step| {
+      world.half_quarter = rotation_z(FRAC_PI_4);
+    };
+    given "full_quarter ← rotation_z(π / 2)" |world, _step| {
+      world.full_quarter = rotation_z(FRAC_PI_2);
+    };
+    given "inv ← inverse(half_quarter)" |world, _step| {
+      world.inv = world.half_quarter.inverse();
     };
     then regex "transform \\* p = point\\((-?\\d+), (-?\\d+), (-?\\d+)\\)" (f32,f32,f32) |world,x,y,z,_step| {
       assert_eq!(&world.transform * &world.p, point(x,y,z));
@@ -573,6 +599,21 @@ mod transformations_steps {
     };
     then "transform * v = v" |world,_step| {
       assert_eq!(&world.transform * &world.v, world.v);
+    };
+    then "half_quarter * p = point(0, √2/2, √2/2)" |world,_step| {
+      assert_eq!(&world.half_quarter * &world.p, point(0.0,SQRT_2/2.0,SQRT_2/2.0));
+    };
+    then regex "full_quarter \\* p = point\\((-?\\d+), (-?\\d+), (-?\\d+)\\)" (f32,f32,f32) |world,x,y,z,_step| {
+      assert_eq!(&world.full_quarter * &world.p, point(x,y,z));
+    };
+    then "inv * p = point(0, √2/2, -√2/2)" |world,_step| {
+      assert_eq!(&world.inv * &world.p, point(0.0,SQRT_2/2.0,-SQRT_2/2.0));
+    };
+    then "half_quarter * p = point(√2/2, 0, √2/2)" |world,_step| {
+      assert_eq!(&world.half_quarter * &world.p, point(SQRT_2/2.0,0.0,SQRT_2/2.0));
+    };
+    then "half_quarter * p = point(-√2/2, √2/2, 0)" |world,_step| {
+      assert_eq!(&world.half_quarter * &world.p, point(-SQRT_2/2.0,SQRT_2/2.0,0.0));
     };
 });
 }
