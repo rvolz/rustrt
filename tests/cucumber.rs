@@ -19,6 +19,8 @@ pub struct MyWorld {
   p: Tuple,
   p1: Tuple,
   p2: Tuple,
+  p3: Tuple,
+  p4: Tuple,
   v: Tuple,
   v1: Tuple,
   v2: Tuple,
@@ -31,6 +33,7 @@ pub struct MyWorld {
   ma: Matrix,
   mb: Matrix,
   mc: Matrix,
+  mt: Matrix,
   transform: Matrix,
   inv: Matrix,
   half_quarter: Matrix,
@@ -53,6 +56,8 @@ impl std::default::Default for MyWorld {
         p: tuple(0.0,0.0,0.0,0.0),
         p1: tuple(0.0,0.0,0.0,0.0),
         p2: tuple(0.0,0.0,0.0,0.0),
+        p3: tuple(0.0,0.0,0.0,0.0),
+        p4: tuple(0.0,0.0,0.0,0.0),
         v: tuple(0.0,0.0,0.0,0.0),
         v1: tuple(0.0,0.0,0.0,0.0),
         v2: tuple(0.0,0.0,0.0,0.0),
@@ -65,6 +70,7 @@ impl std::default::Default for MyWorld {
         ma: matrix(0,0),
         mb: matrix(0,0),
         mc: matrix(0,0),
+        mt: matrix(0,0),
         transform: matrix(0,0),
         inv: matrix(0,0),
         half_quarter: matrix(0,0),
@@ -588,6 +594,28 @@ mod transformations_steps {
     given "inv ← inverse(half_quarter)" |world, _step| {
       world.inv = world.half_quarter.inverse();
     };
+    given "A ← rotation_x(π / 2)" |world,_step| {
+      world.ma = rotation_x(FRAC_PI_2);
+    };
+    given "B ← scaling(5, 5, 5)" |world,_step| {
+      world.mb = scaling(5.0,5.0,5.0);
+    };
+    given "C ← translation(10, 5, 7)" |world,_step| {
+      world.mc = translation(10.0,5.0,7.0);
+    };
+    when "p2 ← A * p" |world,_step| {
+      world.p2 = &world.ma * &world.p;
+    };
+    when "p3 ← B * p2" |world,_step| {
+      world.p3 = &world.mb * &world.p2;
+    };
+    when "p4 ← C * p3" |world,_step| {
+      world.p4 = &world.mc * &world.p3;
+    };
+    when "T ← C * B * A" |world,_step| {
+      let w1 = &world.mc * &world.mb;
+      world.mt =  &w1 * &world.ma;
+    };
     then regex "transform \\* p = point\\((-?\\d+), (-?\\d+), (-?\\d+)\\)" (f32,f32,f32) |world,x,y,z,_step| {
       assert_eq!(&world.transform * &world.p, point(x,y,z));
     };
@@ -617,6 +645,18 @@ mod transformations_steps {
     };
     then "half_quarter * p = point(-√2/2, √2/2, 0)" |world,_step| {
       assert_eq!(&world.half_quarter * &world.p, point(-SQRT_2/2.0,SQRT_2/2.0,0.0));
+    };
+    then "p2 = point(1, -1, 0)" |world,_step| {
+      assert_eq!(world.p2,point(1.0,-1.0,0.0));
+    };
+    then "p3 = point(5, -5, 0)" |world,_step| {
+      assert_eq!(world.p3,point(5.0,-5.0,0.0));
+    };
+    then "p4 = point(15, 0, 7)" |world,_step| {
+      assert_eq!(world.p4,point(15.0,0.0,7.0));
+    };
+    then "T * p = point(15, 0, 7)" |world,_step| {
+      assert_eq!(&world.mt * &world.p,point(15.0,0.0,7.0));
     };
 });
 }
