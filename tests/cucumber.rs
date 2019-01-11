@@ -551,7 +551,7 @@ mod matrix_steps {
 mod transformations_steps {
   use super::*;
   use rustrt::tuple::{point,vector};
-  use rustrt::matrix::{translation,scaling,rotation_x,rotation_y,rotation_z};
+  use rustrt::matrix::{translation,scaling,rotation_x,rotation_y,rotation_z,shearing};
   use core::f32::consts::{FRAC_PI_2,FRAC_PI_4,SQRT_2};
   // Any type that implements cucumber_rust::World + Default can be the world
   steps!(MyWorld => {
@@ -560,6 +560,9 @@ mod transformations_steps {
     };
     given regex "transform ← scaling\\((-?\\d+), (-?\\d+), (-?\\d+)\\)" (f32,f32,f32) |world,x,y,z,_step| {
       world.transform = scaling(x,y,z);
+    };
+    given regex "transform ← shearing\\((-?\\d+), (-?\\d+), (-?\\d+), (-?\\d+), (-?\\d+), (-?\\d+)\\)" (f32,f32,f32,f32,f32,f32) |world,xy,xz,yx,yz,zx,zy,_step| {
+      world.transform = shearing(xy,xz,yx,yz,zx,zy);
     };
     given "inv ← inverse(transform)" |world, _step| {
       world.inv = world.transform.inverse();

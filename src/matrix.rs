@@ -69,6 +69,18 @@ pub fn scaling(x:f32, y:f32, z:f32) -> Matrix {
   m
 }
 
+/// A shearing matrix
+pub fn shearing(xy:f32, xz:f32, yx:f32, yz:f32, zx:f32, zy:f32) -> Matrix {
+  let mut m = id4();
+  m[(0,1)] = xy;
+  m[(0,2)] = xz;
+  m[(1,0)] = yx;
+  m[(1,2)] = yz;
+  m[(2,0)] = zx;
+  m[(2,1)] = zy;
+  m
+}
+
 /// A translation matrix
 pub fn translation(x:f32, y:f32, z:f32) -> Matrix {
   let mut m = id4();
