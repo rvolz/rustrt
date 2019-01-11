@@ -2,9 +2,11 @@ pub mod tuple;
 pub mod canvas;
 pub mod matrix;
 
+use core::f32::consts::{FRAC_PI_2,FRAC_PI_4,SQRT_2,PI};
 use std::fs;
 use crate::tuple::*;
 use crate::canvas::*;
+use crate::matrix::*;
 
 pub struct Projectile {
   position: Tuple,
@@ -75,7 +77,33 @@ fn exc2() -> std::io::Result<()> {
   fs::write("exc2.ppm", c.canvas_to_ppm())
 }
 
+fn cconvert(t: &Tuple, c: &Canvas) -> (i32, i32) {
+  let mid_x = *c.width() as f32 / 2.0;
+  let mid_y = *c.height() as f32 / 2.0;
+  let x = mid_x * t.get_x();
+  let y =  mid_y * t.get_y();
+  ((mid_x + x) as i32, (mid_y+y) as i32)  
+}
+
+fn exc3() -> std::io::Result<()> {
+  let mut c = canvas(800, 800);
+  let red = color(1.0,0.0,0.0);
+  let times: Vec<Tuple> = (0..12).map(|_| point(0.0,0.0,0.0)).collect();
+  let times2: [f32;12] = [PI/2.0,PI/3.0,PI/6.0,2.0*PI,11.0*PI/6.0,5.0*PI/3.0,3.0*PI/2.0,4.0*PI/3.0,7.0*PI/6.0,PI,5.0*PI/6.0,2.0*PI/3.0];
+  for tt in times.iter().zip(times2.iter()) {
+    let p = tt.0;
+    let w = tt.1;
+    let t = &rotation_z(*w) * &translation(0.0,0.9,0.0);
+    let t12 = &t * p;
+    let s12 = cconvert(&t12, &c);
+    println!("Positon {:?}, scaled {:?}", t12, s12);
+    c.write_pixel(s12.0, s12.1, red);
+  }
+  fs::write("exc3.ppm", c.canvas_to_ppm())
+}
+
 fn main() -> std::io::Result<()> {
-  exc1();
-  exc2()
+  //exc1();
+  //exc2();
+  exc3()
 }

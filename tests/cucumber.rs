@@ -3,7 +3,7 @@ extern crate cucumber_rust;
 extern crate rustrt;
 use rustrt::tuple::{Tuple, tuple, color};
 use rustrt::canvas::{Canvas, canvas};
-use rustrt::matrix::{Matrix, matrix, id4};
+use rustrt::matrix::{Matrix, matrix, identity};
 use float_cmp::{ApproxEq};
 
 pub struct MyWorld {
@@ -420,7 +420,7 @@ mod matrix_steps {
       world.b = tuple(n1, n2, n3, n4);
     };
     given "A ← transpose(identity_matrix)" |world,_step| {
-      world.ma = id4().transpose();
+      world.ma = identity().transpose();
     };
     given "B ← submatrix(A, 1, 0)" |world,_step| {
       world.mb = world.ma.submatrix(1,0);
@@ -454,10 +454,10 @@ mod matrix_steps {
       assert_eq!(&world.ma * &world.b, tuple(n1, n2, n3, n4));
     };
     then "A * identity_matrix = A" |world,_step| {
-      assert_eq!(&world.ma * &id4(), world.ma);
+      assert_eq!(&world.ma * &identity(), world.ma);
     };
     then "identity_matrix * a = a" |world,_step| {
-      assert_eq!(&id4() * &world.a, world.a);
+      assert_eq!(&identity() * &world.a, world.a);
     };
     then "transpose(A) is the following matrix:" |world,step| {
       let table = step.table().unwrap();
@@ -470,7 +470,7 @@ mod matrix_steps {
       assert_eq!(world.ma.transpose(), world.m);
     };
     then "A = identity_matrix" |world,_step| {
-      assert_eq!(world.ma, id4());
+      assert_eq!(world.ma, identity());
     };
     then regex "determinant\\((\\w)\\) = (([-+]?[0-9]*\\.?[0-9]+))" (char,f32) |world,mname,result,_step| {
       let mw;

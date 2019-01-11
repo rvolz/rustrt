@@ -102,7 +102,7 @@ impl Canvas {
 
   /// Set the color of a pixel at position x,y
   pub fn write_pixel(&mut self, x: i32, y: i32, color: Tuple) {
-    if x < 0 || x > self.width || y < 0 || y > self.height {
+    if x < 0 || x >= self.width || y < 0 || y >= self.height {
       // TODO log error?
       return;
     }
