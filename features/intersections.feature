@@ -45,6 +45,7 @@ Scenario: The hit, when an intersection occurs on the inside
 Scenario: The hit should offset the point
   Given r ← ray(point(0, 0, -5), vector(0, 0, 1))
     And shape ← sphere() with:
+      | a | b |
       | transform | translation(0, 0, 1) |
     And i ← intersection(5, shape)
   When comps ← prepare_computations(i, r)
@@ -54,6 +55,7 @@ Scenario: The hit should offset the point
 Scenario: The under point is offset below the surface
   Given r ← ray(point(0, 0, -5), vector(0, 0, 1))
     And shape ← glass_sphere() with:
+      | a | b |
       | transform | translation(0, 0, 1) |
     And i ← intersection(5, shape)
     And xs ← intersections(i)
@@ -106,12 +108,15 @@ Then i = i4
 
 Scenario Outline: Finding n1 and n2 at various intersections
   Given A ← glass_sphere() with:
+      | a | b |
       | transform                 | scaling(2, 2, 2) |
       | material.refractive_index | 1.5              |
     And B ← glass_sphere() with:
+      | a | b |
       | transform                 | translation(0, 0, -0.25) |
       | material.refractive_index | 2.0                      |
     And C ← glass_sphere() with:
+      | a | b |
       | transform                 | translation(0, 0, 0.25) |
       | material.refractive_index | 2.5                     |
     And r ← ray(point(0, 0, -4), vector(0, 0, 1))
