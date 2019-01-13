@@ -4,6 +4,9 @@ extern crate rustrt;
 use rustrt::tuple::{Tuple, tuple, color};
 use rustrt::canvas::{Canvas, canvas};
 use rustrt::matrix::{Matrix, matrix, identity};
+use rustrt::ray::{Ray};
+use rustrt::body::{Body,Intersection,intersection,Intersections,intersections};
+use rustrt::sphere::{Sphere, sphere};
 use float_cmp::{ApproxEq};
 
 pub struct MyWorld {
@@ -16,6 +19,7 @@ pub struct MyWorld {
   c1: Tuple,
   c2: Tuple,
   c3: Tuple,
+  direction: Tuple,  
   p: Tuple,
   p1: Tuple,
   p2: Tuple,
@@ -34,15 +38,25 @@ pub struct MyWorld {
   mb: Matrix,
   mc: Matrix,
   mt: Matrix,
+  origin: Tuple,
+  r: Ray,
   transform: Matrix,
   inv: Matrix,
   half_quarter: Matrix,
-  full_quarter: Matrix
+  full_quarter: Matrix,
+  s: Sphere,
+  xs: Option<(f32,f32)>,
+  xs2: Intersections<Sphere>,
+  i: Intersection<Sphere>,
+  i1: Intersection<Sphere>,
+  i2: Intersection<Sphere>,
+  shape: Sphere
 }
 
 impl cucumber_rust::World for MyWorld {}
 impl std::default::Default for MyWorld {
   fn default() -> MyWorld {
+    use rustrt::ray::{Ray,ray};
     // This function is called every time a new scenario is started
     MyWorld { 
         a: tuple(0.0,0.0,0.0,0.0),
@@ -53,6 +67,7 @@ impl std::default::Default for MyWorld {
         c1: tuple(0.0,0.0,0.0,0.0),
         c2: tuple(0.0,0.0,0.0,0.0),
         c3: tuple(0.0,0.0,0.0,0.0),
+        direction: tuple(0.0,0.0,0.0,0.0),
         p: tuple(0.0,0.0,0.0,0.0),
         p1: tuple(0.0,0.0,0.0,0.0),
         p2: tuple(0.0,0.0,0.0,0.0),
@@ -71,10 +86,19 @@ impl std::default::Default for MyWorld {
         mb: matrix(0,0),
         mc: matrix(0,0),
         mt: matrix(0,0),
+        origin: tuple(0.0,0.0,0.0,0.0),
+        r: ray(tuple(0.0,0.0,0.0,0.0),tuple(0.0,0.0,0.0,0.0)),
         transform: matrix(0,0),
         inv: matrix(0,0),
         half_quarter: matrix(0,0),
         full_quarter: matrix(0,0),
+        s: sphere(),
+        xs: None,
+        xs2: intersections(vec!()),
+        i: intersection(0.0,sphere()),
+        i1: intersection(0.0,sphere()),
+        i2: intersection(0.0,sphere()),
+        shape: sphere()
     }
   }
 }
@@ -661,6 +685,123 @@ mod transformations_steps {
 });
 }
 
+mod rays_steps {
+  use super::*;
+  use rustrt::tuple::{point,vector};
+  use rustrt::matrix::{translation};
+  use rustrt::ray::{ray};
+  // Any type that implements cucumber_rust::World + Default can be the world
+  steps!(MyWorld => {
+    given regex "origin ← point\\((-?\\d+), (-?\\d+), (-?\\d+)\\)" (f32,f32,f32) |world,x,y,z,_step| {
+      world.origin = point(x,y,z);
+    };
+    given regex "direction ← vector\\((-?\\d+), (-?\\d+), (-?\\d+)\\)" (f32,f32,f32) |world,x,y,z,_step| {
+      world.direction = vector(x,y,z);
+    };
+    given regex "r ← ray\\(point\\((-?\\d+), (-?\\d+), (-?\\d+)\\), vector\\((-?\\d+), (-?\\d+), (-?\\d+)\\)\\)" (f32,f32,f32,f32,f32,f32) |world,x1,y1,z1,x2,y2,z2,_step| {
+      world.r = ray(point(x1,y1,z1),vector(x2,y2,z2));
+    };
+    given regex "m ← translation\\((-?\\d+), (-?\\d+), (-?\\d+)\\)" (f32,f32,f32) |world,x,y,z,_step| {
+      world.m = translation(x,y,z);
+    };
+    when "r ← ray(origin, direction)" |world, _step| {
+      world.r = ray(world.origin, world.direction);
+    };
+    when "r2 ← transform(r, m)" |world, _step| {
+      //world.r2 = (world.origin, world.direction);
+    };
+    then "r.origin = origin" |world, _step| {
+      assert_eq!(world.r.origin(), &world.origin);
+    };
+    then "r.direction = direction" |world, _step| {
+      assert_eq!(world.r.direction(), &world.direction);
+    };
+    then regex "position\\(r, ([-+]?[0-9]*\\.?[0-9]+)\\) = point\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f32,f32,f32,f32) |world,t,x,y,z,_step| {
+      assert_eq!(world.r.position(t), point(x,y,z));
+    };
+  });
+}
+
+mod spheres_steps {
+  use super::*;
+  use rustrt::tuple::{point};
+  // Any type that implements cucumber_rust::World + Default can be the world
+  steps!(MyWorld => {
+    given regex "origin ← point\\((-?\\d+), (-?\\d+), (-?\\d+)\\)" (f32,f32,f32) |world,x,y,z,_step| {
+      world.origin = point(x,y,z);
+    };
+    given "s ← sphere()" |world, _step| {
+      world.s = sphere();
+    };
+    when "xs ← intersect(s, r)" |world,_step| {
+      world.xs = world.s.intersect(world.r);
+    };
+    then "xs.count = 0" |world,_step| {
+      assert!(world.xs.is_none());
+    };
+    then "xs.count = 2" |world,_step| {
+      assert!(world.xs.is_some());
+    };
+    then regex "xs\\[0\\] = ([-+]?[0-9]*\\.?[0-9]+)" (f32) |world,value,_step| {
+      assert_eq!(world.xs.unwrap().0,value);
+    };
+    then regex "xs\\[1\\] = ([-+]?[0-9]*\\.?[0-9]+)" (f32) |world,value,_step| {
+      assert_eq!(world.xs.unwrap().1,value);
+    };
+
+  });
+}
+
+mod intersections_steps {
+  use super::*;
+  use rustrt::body::{intersection,intersections};
+  // Any type that implements cucumber_rust::World + Default can be the world
+  steps!(MyWorld => {
+    given "shape ← sphere()" |world,_steps| {
+      world.shape = sphere();
+    };
+    given "i ← intersection(4, shape)" |world,_steps| {
+      world.i = intersection(4.0, world.shape);
+    };
+    given "i1 ← intersection(1, s)" |world,_steps| {
+      world.i1 = intersection(1.0, world.s);
+    };
+    given "i2 ← intersection(2, s)" |world,_steps| {
+      world.i2 = intersection(2.0, world.s);
+    };
+    given "xs ← intersections(i2, i1)" |world,_step| {
+      world.xs2 = intersections(vec!(world.i2,world.i1));
+    };
+    when "i ← intersection(3.5, s)" |world,_step| {
+      world.i = intersection(3.5, world.s);
+    };
+    when "xs ← intersections(i1, i2)" |world,_step| {
+      world.xs2 = intersections(vec!(world.i1,world.i2));
+    };
+    when "i ← hit(xs)" |world,_step| {
+      world.i = *world.xs2.hit().unwrap();
+    };
+    then "i.t = 3.5" |world,_step| {
+      assert_eq!(*world.i.t(), 3.5);
+    };
+    then "i.object = s" |world,_step| {
+      assert_eq!(*world.i.object(), world.s);
+    };
+    then "xs.count = 2" |world,_step| {
+      assert_eq!(*world.xs2.count(), 2);
+    };
+    then "xs[0].t = 1" |world,_step| {
+      assert_eq!(*world.xs2.intersections()[0].t(), 1.0);
+    };
+    then "xs[1].t = 2" |world,_step| {
+      assert_eq!(*world.xs2.intersections()[1].t(), 2.0);
+    };
+    then "i = i1" |world,_step| {
+      assert_eq!(&world.i, &world.i1);
+    };
+  });
+}
+
 // Declares a before handler function named `a_before_fn`
 before!(a_before_fn => |_scenario| {
 
@@ -683,7 +824,10 @@ cucumber! {
       tuple_steps::steps,
       canvas_steps::steps,
       matrix_steps::steps,
-      transformations_steps::steps
+      transformations_steps::steps,
+      rays_steps::steps,
+      spheres_steps::steps,
+      intersections_steps::steps
   ],
   setup: setup, // Optional; called once before everything
   before: &[

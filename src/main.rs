@@ -1,8 +1,9 @@
 pub mod tuple;
 pub mod canvas;
 pub mod matrix;
+pub mod ray;
 
-use core::f32::consts::{FRAC_PI_2,FRAC_PI_4,SQRT_2,PI};
+use core::f32::consts::{PI};
 use std::fs;
 use crate::tuple::*;
 use crate::canvas::*;
