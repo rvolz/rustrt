@@ -5,8 +5,9 @@ use rustrt::tuple::{Tuple, tuple, color};
 use rustrt::canvas::{Canvas, canvas};
 use rustrt::matrix::{Matrix, matrix, identity};
 use rustrt::ray::{Ray};
-use rustrt::body::{Body,Intersection,intersection,Intersections,intersections};
 use rustrt::sphere::{Sphere, sphere};
+use rustrt::shape::{Shape};
+use rustrt::intersection::{Intersection,intersection,Intersections,intersections};
 use float_cmp::{ApproxEq};
 
 pub struct MyWorld {
@@ -44,13 +45,18 @@ pub struct MyWorld {
   inv: Matrix,
   half_quarter: Matrix,
   full_quarter: Matrix,
-  s: Sphere,
+  s: Shape,
   xs: Option<(f32,f32)>,
-  xs2: Intersections<Sphere>,
-  i: Intersection<Sphere>,
-  i1: Intersection<Sphere>,
-  i2: Intersection<Sphere>,
-  shape: Sphere
+  xs2: Intersections,
+  i: Intersection,
+  i1: Intersection,
+  i2: Intersection,
+  i3: Intersection,
+  i4: Intersection,
+  shape: Shape,
+  oi: Option<Intersection>,
+  oi1: Option<Intersection>,
+  oi2: Option<Intersection>,
 }
 
 impl cucumber_rust::World for MyWorld {}
@@ -92,13 +98,18 @@ impl std::default::Default for MyWorld {
         inv: matrix(0,0),
         half_quarter: matrix(0,0),
         full_quarter: matrix(0,0),
-        s: sphere(),
+        s: Shape::Sphere(sphere()),
         xs: None,
         xs2: intersections(vec!()),
-        i: intersection(0.0,sphere()),
-        i1: intersection(0.0,sphere()),
-        i2: intersection(0.0,sphere()),
-        shape: sphere()
+        i: intersection(0.0,Shape::Sphere(sphere())),
+        i1: intersection(0.0,Shape::Sphere(sphere())),
+        i2: intersection(0.0,Shape::Sphere(sphere())),
+        i3: intersection(0.0,Shape::Sphere(sphere())),
+        i4: intersection(0.0,Shape::Sphere(sphere())),
+        shape: Shape::Sphere(sphere()),
+        oi: Some(intersection(0.0,Shape::Sphere(sphere()))),
+        oi1: Some(intersection(0.0,Shape::Sphere(sphere()))),
+        oi2: Some(intersection(0.0,Shape::Sphere(sphere()))),
     }
   }
 }
@@ -724,6 +735,7 @@ mod rays_steps {
 
 mod spheres_steps {
   use super::*;
+  use rustrt::body::Body;
   use rustrt::tuple::{point};
   // Any type that implements cucumber_rust::World + Default can be the world
   steps!(MyWorld => {
@@ -731,7 +743,7 @@ mod spheres_steps {
       world.origin = point(x,y,z);
     };
     given "s ← sphere()" |world, _step| {
-      world.s = sphere();
+      world.s = Shape::Sphere(sphere());
     };
     when "xs ← intersect(s, r)" |world,_step| {
       world.xs = world.s.intersect(world.r);
@@ -754,23 +766,32 @@ mod spheres_steps {
 
 mod intersections_steps {
   use super::*;
-  use rustrt::body::{intersection,intersections};
+  use rustrt::intersection::{intersection,intersections};
   // Any type that implements cucumber_rust::World + Default can be the world
   steps!(MyWorld => {
     given "shape ← sphere()" |world,_steps| {
-      world.shape = sphere();
+      world.shape = Shape::Sphere(sphere());
     };
     given "i ← intersection(4, shape)" |world,_steps| {
       world.i = intersection(4.0, world.shape);
     };
-    given "i1 ← intersection(1, s)" |world,_steps| {
-      world.i1 = intersection(1.0, world.s);
+    given regex "i1 ← intersection\\((\\-?\\d), s\\)" (f32) |world,value,_steps| {
+      world.i1 = intersection(value, world.s);
     };
-    given "i2 ← intersection(2, s)" |world,_steps| {
-      world.i2 = intersection(2.0, world.s);
+    given regex "i2 ← intersection\\((\\-?\\d), s\\)" (f32) |world,value,_steps| {
+      world.i2 = intersection(value, world.s);
+    };
+    given regex "i3 ← intersection\\((\\-?\\d), s\\)" (f32) |world,value,_steps| {
+      world.i3 = intersection(value, world.s);
+    };
+    given regex "i4 ← intersection\\((\\-?\\d), s\\)" (f32) |world,value,_steps| {
+      world.i4 = intersection(value, world.s);
     };
     given "xs ← intersections(i2, i1)" |world,_step| {
       world.xs2 = intersections(vec!(world.i2,world.i1));
+    };
+    given "xs ← intersections(i1, i2, i3, i4)" |world,_step| {
+      world.xs2 = intersections(vec!(world.i1,world.i2,world.i3,world.i4));
     };
     when "i ← intersection(3.5, s)" |world,_step| {
       world.i = intersection(3.5, world.s);
@@ -778,8 +799,9 @@ mod intersections_steps {
     when "xs ← intersections(i1, i2)" |world,_step| {
       world.xs2 = intersections(vec!(world.i1,world.i2));
     };
+    
     when "i ← hit(xs)" |world,_step| {
-      world.i = *world.xs2.hit().unwrap();
+      world.oi = world.xs2.hitc();
     };
     then "i.t = 3.5" |world,_step| {
       assert_eq!(*world.i.t(), 3.5);
@@ -797,7 +819,16 @@ mod intersections_steps {
       assert_eq!(*world.xs2.intersections()[1].t(), 2.0);
     };
     then "i = i1" |world,_step| {
-      assert_eq!(&world.i, &world.i1);
+      assert_eq!(&world.oi, &Some(world.i1));
+    };
+    then "i = i2" |world,_step| {
+      assert_eq!(&world.oi, &Some(world.i2));
+    };
+    then "i is nothing" |world,_step| {
+      assert_eq!(&world.oi, &None);
+    };
+    then "i = i4" |world,_step| {
+      assert_eq!(&world.oi, &Some(world.i4));
     };
   });
 }
