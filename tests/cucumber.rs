@@ -8,6 +8,7 @@ use rustrt::ray::{Ray};
 use rustrt::sphere::{sphere};
 use rustrt::shape::{Shape};
 use rustrt::intersection::{Intersection,intersection,Intersections,intersections};
+#[allow(unused_imports)] // Import is required, though
 use float_cmp::{ApproxEq};
 
 pub struct MyWorld {
