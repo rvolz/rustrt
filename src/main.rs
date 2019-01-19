@@ -26,7 +26,7 @@ pub fn tick(env: &Environment, proj: &Projectile) -> Projectile {
   }
 }
 
-fn exc1() {
+fn _exc1() {
   println!("Chapter 1 exercise");
   let v = tuple::vector(1.0, 1.0, 0.0);
   let mut p = Projectile {
@@ -45,7 +45,7 @@ fn exc1() {
   }
 }
 
-fn scale_position(width: i32, height: i32, position: Tuple) -> (i32, i32) {
+fn _scale_position(width: i32, height: i32, position: Tuple) -> (i32, i32) {
   let mx = width as f32 / 100.0;
   let my = height as f32 / 100.0;
   let nx = (position.get_x()*mx) as i32;
@@ -53,7 +53,7 @@ fn scale_position(width: i32, height: i32, position: Tuple) -> (i32, i32) {
   (nx, ny)
 }
 
-fn exc2() -> std::io::Result<()> {
+fn _exc2() -> std::io::Result<()> {
   println!("Chapter 2 exercise");
   let v = tuple::vector(1.0, 1.8, 0.0);
   let mut p = Projectile {
@@ -71,7 +71,7 @@ fn exc2() -> std::io::Result<()> {
     p = tick(&e, &p);
     ticks += 1;
     println!("Ticks {:?}, Position {:?}",ticks, p.position);
-    let (nx, ny) = scale_position(*c.width(), *c.height(), p.position);
+    let (nx, ny) = _scale_position(*c.width(), *c.height(), p.position);
     println!("Ticks {:?}, Scalled positon {:?},{:?}",ticks, nx, ny);
     c.write_pixel(nx, ny, red);
   }

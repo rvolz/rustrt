@@ -1,4 +1,5 @@
 use crate::tuple::*;
+use crate::matrix::Matrix;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Ray {
@@ -15,5 +16,12 @@ impl Ray {
   pub fn direction(&self) -> &Tuple { &self.direction }
   pub fn position(&self, t: f32) -> Tuple {
     self.origin + self.direction * t
+  }
+  /// Transform a ray with a transformation matrix
+  pub fn transform(&self, m: &Matrix) -> Ray {
+    Ray {
+      origin: m * &self.origin,
+      direction: m * &self.direction
+    }
   }
 }

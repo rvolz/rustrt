@@ -5,7 +5,7 @@ use rustrt::tuple::{Tuple, tuple, color};
 use rustrt::canvas::{Canvas, canvas};
 use rustrt::matrix::{Matrix, matrix, identity};
 use rustrt::ray::{Ray};
-use rustrt::sphere::{Sphere, sphere};
+use rustrt::sphere::{sphere};
 use rustrt::shape::{Shape};
 use rustrt::intersection::{Intersection,intersection,Intersections,intersections};
 use float_cmp::{ApproxEq};
@@ -41,6 +41,7 @@ pub struct MyWorld {
   mt: Matrix,
   origin: Tuple,
   r: Ray,
+  r2: Ray,
   transform: Matrix,
   inv: Matrix,
   half_quarter: Matrix,
@@ -62,7 +63,7 @@ pub struct MyWorld {
 impl cucumber_rust::World for MyWorld {}
 impl std::default::Default for MyWorld {
   fn default() -> MyWorld {
-    use rustrt::ray::{Ray,ray};
+    use rustrt::ray::{ray};
     // This function is called every time a new scenario is started
     MyWorld { 
         a: tuple(0.0,0.0,0.0,0.0),
@@ -94,6 +95,7 @@ impl std::default::Default for MyWorld {
         mt: matrix(0,0),
         origin: tuple(0.0,0.0,0.0,0.0),
         r: ray(tuple(0.0,0.0,0.0,0.0),tuple(0.0,0.0,0.0,0.0)),
+        r2: ray(tuple(0.0,0.0,0.0,0.0),tuple(0.0,0.0,0.0,0.0)),
         transform: matrix(0,0),
         inv: matrix(0,0),
         half_quarter: matrix(0,0),
@@ -699,7 +701,7 @@ mod transformations_steps {
 mod rays_steps {
   use super::*;
   use rustrt::tuple::{point,vector};
-  use rustrt::matrix::{translation};
+  use rustrt::matrix::{scaling,translation};
   use rustrt::ray::{ray};
   // Any type that implements cucumber_rust::World + Default can be the world
   steps!(MyWorld => {
@@ -715,17 +717,26 @@ mod rays_steps {
     given regex "m ← translation\\((-?\\d+), (-?\\d+), (-?\\d+)\\)" (f32,f32,f32) |world,x,y,z,_step| {
       world.m = translation(x,y,z);
     };
+    given regex "m ← scaling\\((-?\\d+), (-?\\d+), (-?\\d+)\\)" (f32,f32,f32) |world,x,y,z,_step| {
+      world.m = scaling(x,y,z);
+    };
     when "r ← ray(origin, direction)" |world, _step| {
       world.r = ray(world.origin, world.direction);
     };
     when "r2 ← transform(r, m)" |world, _step| {
-      //world.r2 = (world.origin, world.direction);
+      world.r2 = world.r.transform(&world.m);
     };
     then "r.origin = origin" |world, _step| {
       assert_eq!(world.r.origin(), &world.origin);
     };
     then "r.direction = direction" |world, _step| {
       assert_eq!(world.r.direction(), &world.direction);
+    };
+    then regex "r2.origin = point\\((-?\\d+), (-?\\d+), (-?\\d+)\\)" (f32,f32,f32) |world,x,y,z,_step| {
+      assert_eq!(world.r2.origin(), &point(x,y,z));
+    };
+    then regex "r2.direction = vector\\((-?\\d+), (-?\\d+), (-?\\d+)\\)" (f32,f32,f32) |world,x,y,z,_step| {
+      assert_eq!(world.r2.direction(), &vector(x,y,z));
     };
     then regex "position\\(r, ([-+]?[0-9]*\\.?[0-9]+)\\) = point\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f32,f32,f32,f32) |world,t,x,y,z,_step| {
       assert_eq!(world.r.position(t), point(x,y,z));
