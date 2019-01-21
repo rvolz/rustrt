@@ -1,9 +1,10 @@
+use derive_builder::Builder;
 use ordered_float::*;
 use crate::shape::Shape;
 
 /// Intersection of a ray with a 3d body
 /// Contains the location (t) and the body
-#[derive(Debug, Clone, Copy)]
+#[derive(Builder, Debug, Clone)]
 pub struct Intersection where {
   t: OrderedFloat<f32>,
   object: Shape
@@ -28,8 +29,8 @@ impl PartialEq for Intersection  {
   }
 }
 
-/// A list of intersections 
-#[derive(Debug)]
+/// A list of intersections
+#[derive(Default, Builder, Debug, Clone)]
 pub struct Intersections {
   count: usize,
   intersections: Vec<Intersection>
@@ -45,23 +46,30 @@ pub fn intersections(args: Vec<Intersection>) -> Intersections {
 impl Intersections {
   pub fn count(&self) -> &usize { &self.count }
   pub fn intersections(&self) -> &Vec<Intersection> { &self.intersections }
-  pub fn hit<'a>(&'a self) -> Option<&'a Intersection> {
-    let positives: Vec<&Intersection> = self.intersections.iter().filter(|i| i.t >= OrderedFloat(0.0f32)).collect();
-    if positives.len() == 0 {
-      None
-    } else {
-      let min_t = positives.iter().min_by(|i,j| i.t.cmp(&j.t));
-      Some(min_t.unwrap())
+  pub fn hit(&self) -> Option<&Intersection> {
+    let positives: Vec<&Intersection> = self.intersections.iter()
+      .filter(|i| i.t >= OrderedFloat(0.0f32)).collect();
+    let min_t = positives.iter().min_by(|i,j| i.t.cmp(&j.t));
+    match min_t {
+      Some(min_t) => Some(*min_t),
+      None => None
     }
   }
   pub fn hitc(&self) -> Option<Intersection> {
-    let positives: Vec<&Intersection> = self.intersections.iter().filter(|i| i.t >= OrderedFloat(0.0f32)).collect();
-    if positives.len() == 0 {
-      None
-    } else {
-      let min_t = positives.iter().min_by(|i,j| i.t.cmp(&j.t));
-      let min_tc = min_t.unwrap().clone();
-      Some(*min_tc)
+    let positives: Vec<&Intersection> = self.intersections.iter()
+      .filter(|i| i.t >= OrderedFloat(0.0f32)).collect();
+    let min_t = positives.iter().min_by(|i,j| i.t.cmp(&j.t));
+    match min_t {
+      Some(min_t) => {
+        let i1 = IntersectionBuilder::default()
+          .t(min_t.t)
+          .object(min_t.object.clone())
+          .build()
+          .unwrap();
+        Some(i1)
+      },
+      None => None
     }
   }
 }
+

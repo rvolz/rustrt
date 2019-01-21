@@ -5,7 +5,7 @@ use rustrt::tuple::{Tuple, tuple, color};
 use rustrt::canvas::{Canvas, canvas};
 use rustrt::matrix::{Matrix, matrix, identity};
 use rustrt::ray::{Ray};
-use rustrt::sphere::{sphere};
+use rustrt::sphere::{sphere,Sphere};
 use rustrt::shape::{Shape};
 use rustrt::intersection::{Intersection,intersection,Intersections,intersections};
 #[allow(unused_imports)] // Import is required, though
@@ -21,7 +21,7 @@ pub struct MyWorld {
   c1: Tuple,
   c2: Tuple,
   c3: Tuple,
-  direction: Tuple,  
+  direction: Tuple,
   p: Tuple,
   p1: Tuple,
   p2: Tuple,
@@ -47,7 +47,7 @@ pub struct MyWorld {
   inv: Matrix,
   half_quarter: Matrix,
   full_quarter: Matrix,
-  s: Shape,
+  s: Sphere,
   xs: Option<(f32,f32)>,
   xs2: Intersections,
   i: Intersection,
@@ -66,7 +66,7 @@ impl std::default::Default for MyWorld {
   fn default() -> MyWorld {
     use rustrt::ray::{ray};
     // This function is called every time a new scenario is started
-    MyWorld { 
+    MyWorld {
         a: tuple(0.0,0.0,0.0,0.0),
         a1: tuple(0.0,0.0,0.0,0.0),
         a2: tuple(0.0,0.0,0.0,0.0),
@@ -101,7 +101,7 @@ impl std::default::Default for MyWorld {
         inv: matrix(0,0),
         half_quarter: matrix(0,0),
         full_quarter: matrix(0,0),
-        s: Shape::Sphere(sphere()),
+        s: sphere(),
         xs: None,
         xs2: intersections(vec!()),
         i: intersection(0.0,Shape::Sphere(sphere())),
@@ -276,7 +276,7 @@ mod tuple_steps {
       then regex "dot\\(a, b\\) = ([-+]?[0-9]*\\.?[0-9]+)" (f32) |world, number, _step| {
         assert_eq!(world.a.dot(world.b), number);
       };
-      
+
       then regex "cross\\(([a-z]), ([a-z])\\) = vector\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (String, String, f32,f32,f32) |world, a1, _b1, n1, n2, n3, _step| {
         if a1 == "a" {
           assert_eq!(world.a.cross(world.b), vector(n1,n2,n3));
@@ -337,7 +337,7 @@ mod canvas_steps {
   // Any type that implements cucumber_rust::World + Default can be the world
   steps!(MyWorld => {
     given regex "c ← canvas\\(([0-9]+), ([0-9]+)\\)" (i32,i32) |world, w, h, _step| {
-      world.cc = canvas(w,h);  
+      world.cc = canvas(w,h);
     };
 
     given "red ← color(1, 0, 0)" |world, _step| {
@@ -399,13 +399,13 @@ mod canvas_steps {
       let txt = step.docstring().unwrap();
       let header:Vec<&str> = world.ppm.split('\n').collect();
       assert_eq!(&header[3..6].join("\n"), txt);
-    }; 
+    };
 
     then "lines 4-7 of ppm are" |world, step| {
       let txt = step.docstring().unwrap();
       let header:Vec<&str> = world.ppm.split('\n').collect();
       assert_eq!(&header[3..7].join("\n"), txt);
-    }; 
+    };
 
     then "the last character of ppm is a newline" |world, _step| {
       assert!(world.ppm.ends_with('\n'));
@@ -585,7 +585,7 @@ mod matrix_steps {
       assert!(world.ma.inverse().approx_eq(&world.m,2.0 * ::std::f32::EPSILON, 2000));
       //assert_eq!(world.ma.inverse(), world.m);
     };
-    
+
     then "C * inverse(B) = A" |world,_step| {
       assert_eq!(&world.mc * &world.mb.inverse(), world.ma);
     };
@@ -755,7 +755,7 @@ mod spheres_steps {
       world.origin = point(x,y,z);
     };
     given "s ← sphere()" |world, _step| {
-      world.s = Shape::Sphere(sphere());
+      world.s = sphere();
     };
     when "xs ← intersect(s, r)" |world,_step| {
       world.xs = world.s.intersect(world.r);
@@ -785,33 +785,33 @@ mod intersections_steps {
       world.shape = Shape::Sphere(sphere());
     };
     given "i ← intersection(4, shape)" |world,_steps| {
-      world.i = intersection(4.0, world.shape);
+      world.i = intersection(4.0, world.shape.clone());
     };
     given regex "i1 ← intersection\\((\\-?\\d), s\\)" (f32) |world,value,_steps| {
-      world.i1 = intersection(value, world.s);
+      world.i1 = intersection(value, world.shape.clone());
     };
     given regex "i2 ← intersection\\((\\-?\\d), s\\)" (f32) |world,value,_steps| {
-      world.i2 = intersection(value, world.s);
+      world.i2 = intersection(value, world.shape.clone());
     };
     given regex "i3 ← intersection\\((\\-?\\d), s\\)" (f32) |world,value,_steps| {
-      world.i3 = intersection(value, world.s);
+      world.i3 = intersection(value, world.shape.clone());
     };
     given regex "i4 ← intersection\\((\\-?\\d), s\\)" (f32) |world,value,_steps| {
-      world.i4 = intersection(value, world.s);
+      world.i4 = intersection(value, world.shape.clone());
     };
     given "xs ← intersections(i2, i1)" |world,_step| {
-      world.xs2 = intersections(vec!(world.i2,world.i1));
+      world.xs2 = intersections(vec!(world.i2.clone(),world.i1.clone()));
     };
     given "xs ← intersections(i1, i2, i3, i4)" |world,_step| {
-      world.xs2 = intersections(vec!(world.i1,world.i2,world.i3,world.i4));
+      world.xs2 = intersections(vec!(world.i1.clone(),world.i2.clone(),world.i3.clone(),world.i4.clone()));
     };
     when "i ← intersection(3.5, s)" |world,_step| {
-      world.i = intersection(3.5, world.s);
+      world.i = intersection(3.5, world.shape.clone());
     };
     when "xs ← intersections(i1, i2)" |world,_step| {
-      world.xs2 = intersections(vec!(world.i1,world.i2));
+      world.xs2 = intersections(vec!(world.i1.clone(),world.i2.clone()));
     };
-    
+
     when "i ← hit(xs)" |world,_step| {
       world.oi = world.xs2.hitc();
     };
@@ -819,7 +819,7 @@ mod intersections_steps {
       assert_eq!(*world.i.t(), 3.5);
     };
     then "i.object = s" |world,_step| {
-      assert_eq!(*world.i.object(), world.s);
+      assert_eq!(*world.i.object(), world.shape);
     };
     then "xs.count = 2" |world,_step| {
       assert_eq!(*world.xs2.count(), 2);
@@ -831,16 +831,16 @@ mod intersections_steps {
       assert_eq!(*world.xs2.intersections()[1].t(), 2.0);
     };
     then "i = i1" |world,_step| {
-      assert_eq!(&world.oi, &Some(world.i1));
+      assert_eq!(&world.oi, &Some(world.i1.clone()));
     };
     then "i = i2" |world,_step| {
-      assert_eq!(&world.oi, &Some(world.i2));
+      assert_eq!(&world.oi, &Some(world.i2.clone()));
     };
     then "i is nothing" |world,_step| {
       assert_eq!(&world.oi, &None);
     };
     then "i = i4" |world,_step| {
-      assert_eq!(&world.oi, &Some(world.i4));
+      assert_eq!(&world.oi, &Some(world.i4.clone()));
     };
   });
 }
@@ -857,7 +857,7 @@ after!(an_after_fn => |_scenario| {
 
 // A setup function to be called before everything else
 fn setup() {
-    
+
 }
 
 cucumber! {
@@ -875,8 +875,8 @@ cucumber! {
   setup: setup, // Optional; called once before everything
   before: &[
       a_before_fn // Optional; called before each scenario
-  ], 
+  ],
   after: &[
       an_after_fn // Optional; called after each scenario
-  ] 
+  ]
 }

@@ -16,8 +16,8 @@ impl Shape {
         let oi = sphere.intersect(ray);
         match oi {
           Some((t1,t2)) => {
-            let i1 = intersection(t1, self);
-            let i2 = intersection(t2, self);
+            let i1 = intersection(t1, self.clone());
+            let i2 = intersection(t2, self.clone());
             intersections(vec![i1,i2])
         }
           None => intersections(vec![])
