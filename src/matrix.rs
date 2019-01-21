@@ -10,7 +10,7 @@ pub struct Matrix {
   data: Vec<f32>
 }
 
-pub fn matrix(columns:u32, rows:u32) -> Matrix {  
+pub fn matrix(columns:u32, rows:u32) -> Matrix {
   let csize = (columns * rows) as usize;
   let data = vec![0.0; csize];
   Matrix {columns,rows,data}
@@ -128,7 +128,7 @@ impl Matrix {
   }
   pub fn submatrix(&self,row: usize, col: usize) -> Matrix {
     if row as u32 >= self.rows || col as u32 >= self.columns {
-      panic!("Matrix row/col {:?},{:?} out of range {:?},{:?}", 
+      panic!("Matrix row/col {:?},{:?} out of range {:?},{:?}",
         row,col,self.rows(),self.columns());
     }
     let mut m = matrix(self.rows-1, self.columns-1);
@@ -162,7 +162,7 @@ impl Index<(u32,u32)> for Matrix {
     let row = pos.0;
     let col = pos.1;
     if row >= self.rows || col >= self.columns {
-      panic!("Matrix coordinates {:?},{:?} out of range {:?},{:?}", 
+      panic!("Matrix coordinates {:?},{:?} out of range {:?},{:?}",
         row,col,self.rows(),self.columns());
     }
     let index = (row*self.columns+col) as usize;
@@ -175,7 +175,7 @@ impl IndexMut<(u32,u32)> for Matrix {
     let row = pos.0;
     let col = pos.1;
     if row >= self.rows || col >= self.columns {
-      panic!("Matrix coordinates {:?},{:?} out of range {:?},{:?}", 
+      panic!("Matrix coordinates {:?},{:?} out of range {:?},{:?}",
         row,col,self.rows(),self.columns());
     }
     let index = (row*self.columns+col) as usize;
@@ -188,7 +188,25 @@ impl Mul for &Matrix {
 
   fn mul(self, _rhs:&Matrix) -> Matrix {
     if self.rows != _rhs.rows || self.columns != _rhs.columns {
-      panic!("Trying to multiply matrices with different sizes: {:?}x{:?} != {:?}x{:?}", 
+      panic!("Trying to multiply matrices with different sizes: {:?}x{:?} != {:?}x{:?}",
+        self.rows(),self.columns(),_rhs.rows(),_rhs.columns());
+    }
+    let mut m = matrix(self.rows, self.columns);
+    for row in 0..self.rows {
+      for col in 0..self.columns {
+        m[(row,col)] = (0..self.rows).map(|i| self[(row,i)]*_rhs[(i,col)]).sum();
+      }
+    }
+    m
+  }
+}
+
+impl Mul for Matrix {
+  type Output = Matrix;
+
+  fn mul(self, _rhs:Matrix) -> Matrix {
+    if self.rows != _rhs.rows || self.columns != _rhs.columns {
+      panic!("Trying to multiply matrices with different sizes: {:?}x{:?} != {:?}x{:?}",
         self.rows(),self.columns(),_rhs.rows(),_rhs.columns());
     }
     let mut m = matrix(self.rows, self.columns);
@@ -206,7 +224,7 @@ impl Mul<&Tuple> for &Matrix {
 
   fn mul(self, _rhs:&Tuple) -> Tuple {
     if self.rows != 4 || self.columns != 4 {
-      panic!("Trying to multiply matrix and tuple with bad size: {:?}x{:?}", 
+      panic!("Trying to multiply matrix and tuple with bad size: {:?}x{:?}",
         self.rows(),self.columns());
     }
     tuple(
@@ -256,10 +274,13 @@ impl ApproxEq for Matrix {
   }
 }
 
+impl Default for Matrix {
+    fn default() -> Self { identity() }
+}
 
 #[cfg(test)]
-mod tests {   
-  use super::*; 
+mod tests {
+  use super::*;
   #[test]
   fn fp_comparison1() {
     let mut a = matrix(2,2);

@@ -6,7 +6,7 @@ use float_cmp::{ApproxEq};
 pub struct Tuple {
   x: f32,
   y: f32,
-  z: f32, 
+  z: f32,
   w: f32
 }
 
@@ -44,7 +44,7 @@ impl Tuple {
   pub fn red(&self) -> &f32 { &self.x }
   pub fn green(&self) -> &f32 { &self.y }
   pub fn blue(&self) -> &f32 { &self.z }
-  
+
   /// Computes the cross product of two vectors. Panics with points
   pub fn cross(&self, rhs: Tuple) -> Tuple {
     if is_point(&self) || is_point(&rhs) {
@@ -99,7 +99,7 @@ impl ops::Add for Tuple {
   type Output = Tuple;
 
   /// Adds two tuples and returns the resulting tuple.
-  /// Adding tuples and vectors, or two vectors is allowed. 
+  /// Adding tuples and vectors, or two vectors is allowed.
   /// Adding two points makes no sense and causes an error.
   fn add(self, _rhs: Tuple) -> Tuple {
     if is_point(&self) && is_point(&_rhs) {
@@ -207,9 +207,13 @@ impl ApproxEq for Tuple {
   }
 }
 
+impl Default for Tuple {
+    fn default() -> Self { tuple(0.0,0.0,0.0,0.0) }
+}
+
 #[cfg(test)]
-mod tests {   
-  use super::*; 
+mod tests {
+  use super::*;
   #[test]
   fn tuple_as_a_point() {
       assert_eq!(Tuple {x:4.3, y:-4.2, z:3.1, w:1.0}, tuple(4.3, -4.2, 3.1, 1.0));
@@ -260,7 +264,7 @@ mod tests {
     assert_eq!(vector(-2.0,-4.0,-6.0), p1-p2);
   }
 
-  /// Subtracting a vector from a point yields the point moved backwards 
+  /// Subtracting a vector from a point yields the point moved backwards
   /// by the vector
   #[test]
   fn subtract_vector_from_point() {
@@ -269,7 +273,7 @@ mod tests {
     assert_eq!(point(-2.0,-4.0,-6.0), p-v);
   }
 
-  /// Subtracting two vectors yields another vector, representing the change in direction 
+  /// Subtracting two vectors yields another vector, representing the change in direction
   #[test]
   fn subtract_vectors() {
     let v1 = vector(3.0,2.0,1.0);
