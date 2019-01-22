@@ -3,7 +3,7 @@ extern crate cucumber_rust;
 extern crate rustrt;
 use rustrt::tuple::{Tuple, tuple, color};
 use rustrt::canvas::{Canvas, canvas};
-use rustrt::matrix::{Matrix, matrix, identity};
+use rustrt::matrix::{Matrix, identity};
 use rustrt::ray::{Ray};
 use rustrt::sphere::{sphere,Sphere};
 use rustrt::shape::{Shape};
@@ -43,6 +43,7 @@ pub struct MyWorld {
   origin: Tuple,
   r: Ray,
   r2: Ray,
+  t: Matrix,
   transform: Matrix,
   inv: Matrix,
   half_quarter: Matrix,
@@ -89,18 +90,19 @@ impl std::default::Default for MyWorld {
         cc: canvas(0,0),
         red: color(1.0,0.0,0.0),
         ppm: String::new(),
-        m: matrix(0,0),
-        ma: matrix(0,0),
-        mb: matrix(0,0),
-        mc: matrix(0,0),
-        mt: matrix(0,0),
+        m: Matrix::default(),
+        ma: Matrix::default(),
+        mb: Matrix::default(),
+        mc: Matrix::default(),
+        mt: Matrix::default(),
         origin: tuple(0.0,0.0,0.0,0.0),
         r: ray(tuple(0.0,0.0,0.0,0.0),tuple(0.0,0.0,0.0,0.0)),
         r2: ray(tuple(0.0,0.0,0.0,0.0),tuple(0.0,0.0,0.0,0.0)),
-        transform: matrix(0,0),
-        inv: matrix(0,0),
-        half_quarter: matrix(0,0),
-        full_quarter: matrix(0,0),
+        t: Matrix::default(),
+        transform: Matrix::default(),
+        inv: Matrix::default(),
+        half_quarter: Matrix::default(),
+        full_quarter: Matrix::default(),
         s: sphere(),
         xs: None,
         xs2: intersections(vec!()),
@@ -592,258 +594,6 @@ mod matrix_steps {
   });
 }
 
-mod transformations_steps {
-  use super::*;
-  use rustrt::tuple::{point,vector};
-  use rustrt::matrix::{translation,scaling,rotation_x,rotation_y,rotation_z,shearing};
-  use core::f32::consts::{FRAC_PI_2,FRAC_PI_4,SQRT_2};
-  // Any type that implements cucumber_rust::World + Default can be the world
-  steps!(MyWorld => {
-    given regex "transform ← translation\\((-?\\d+), (-?\\d+), (-?\\d+)\\)" (f32,f32,f32) |world,x,y,z,_step| {
-      world.transform = translation(x,y,z);
-    };
-    given regex "transform ← scaling\\((-?\\d+), (-?\\d+), (-?\\d+)\\)" (f32,f32,f32) |world,x,y,z,_step| {
-      world.transform = scaling(x,y,z);
-    };
-    given regex "transform ← shearing\\((-?\\d+), (-?\\d+), (-?\\d+), (-?\\d+), (-?\\d+), (-?\\d+)\\)" (f32,f32,f32,f32,f32,f32) |world,xy,xz,yx,yz,zx,zy,_step| {
-      world.transform = shearing(xy,xz,yx,yz,zx,zy);
-    };
-    given "inv ← inverse(transform)" |world, _step| {
-      world.inv = world.transform.inverse();
-    };
-    given "half_quarter ← rotation_x(π / 4)" |world, _step| {
-      world.half_quarter = rotation_x(FRAC_PI_4);
-    };
-    given "full_quarter ← rotation_x(π / 2)" |world, _step| {
-      world.full_quarter = rotation_x(FRAC_PI_2);
-    };
-    given "half_quarter ← rotation_y(π / 4)" |world, _step| {
-      world.half_quarter = rotation_y(FRAC_PI_4);
-    };
-    given "full_quarter ← rotation_y(π / 2)" |world, _step| {
-      world.full_quarter = rotation_y(FRAC_PI_2);
-    };
-    given "half_quarter ← rotation_z(π / 4)" |world, _step| {
-      world.half_quarter = rotation_z(FRAC_PI_4);
-    };
-    given "full_quarter ← rotation_z(π / 2)" |world, _step| {
-      world.full_quarter = rotation_z(FRAC_PI_2);
-    };
-    given "inv ← inverse(half_quarter)" |world, _step| {
-      world.inv = world.half_quarter.inverse();
-    };
-    given "A ← rotation_x(π / 2)" |world,_step| {
-      world.ma = rotation_x(FRAC_PI_2);
-    };
-    given "B ← scaling(5, 5, 5)" |world,_step| {
-      world.mb = scaling(5.0,5.0,5.0);
-    };
-    given "C ← translation(10, 5, 7)" |world,_step| {
-      world.mc = translation(10.0,5.0,7.0);
-    };
-    when "p2 ← A * p" |world,_step| {
-      world.p2 = &world.ma * &world.p;
-    };
-    when "p3 ← B * p2" |world,_step| {
-      world.p3 = &world.mb * &world.p2;
-    };
-    when "p4 ← C * p3" |world,_step| {
-      world.p4 = &world.mc * &world.p3;
-    };
-    when "T ← C * B * A" |world,_step| {
-      let w1 = &world.mc * &world.mb;
-      world.mt =  &w1 * &world.ma;
-    };
-    then regex "transform \\* p = point\\((-?\\d+), (-?\\d+), (-?\\d+)\\)" (f32,f32,f32) |world,x,y,z,_step| {
-      assert_eq!(&world.transform * &world.p, point(x,y,z));
-    };
-    then regex "transform \\* v = vector\\((-?\\d+), (-?\\d+), (-?\\d+)\\)" (f32,f32,f32) |world,x,y,z,_step| {
-      assert_eq!(&world.transform * &world.v, vector(x,y,z));
-    };
-    then regex "inv \\* p = point\\((-?\\d+), (-?\\d+), (-?\\d+)\\)" (f32,f32,f32) |world,x,y,z,_step| {
-      assert_eq!(&world.inv * &world.p, point(x,y,z));
-    };
-    then regex "inv \\* v = vector\\((-?\\d+), (-?\\d+), (-?\\d+)\\)" (f32,f32,f32) |world,x,y,z,_step| {
-      assert_eq!(&world.inv * &world.v, vector(x,y,z));
-    };
-    then "transform * v = v" |world,_step| {
-      assert_eq!(&world.transform * &world.v, world.v);
-    };
-    then "half_quarter * p = point(0, √2/2, √2/2)" |world,_step| {
-      assert_eq!(&world.half_quarter * &world.p, point(0.0,SQRT_2/2.0,SQRT_2/2.0));
-    };
-    then regex "full_quarter \\* p = point\\((-?\\d+), (-?\\d+), (-?\\d+)\\)" (f32,f32,f32) |world,x,y,z,_step| {
-      assert_eq!(&world.full_quarter * &world.p, point(x,y,z));
-    };
-    then "inv * p = point(0, √2/2, -√2/2)" |world,_step| {
-      assert_eq!(&world.inv * &world.p, point(0.0,SQRT_2/2.0,-SQRT_2/2.0));
-    };
-    then "half_quarter * p = point(√2/2, 0, √2/2)" |world,_step| {
-      assert_eq!(&world.half_quarter * &world.p, point(SQRT_2/2.0,0.0,SQRT_2/2.0));
-    };
-    then "half_quarter * p = point(-√2/2, √2/2, 0)" |world,_step| {
-      assert_eq!(&world.half_quarter * &world.p, point(-SQRT_2/2.0,SQRT_2/2.0,0.0));
-    };
-    then "p2 = point(1, -1, 0)" |world,_step| {
-      assert_eq!(world.p2,point(1.0,-1.0,0.0));
-    };
-    then "p3 = point(5, -5, 0)" |world,_step| {
-      assert_eq!(world.p3,point(5.0,-5.0,0.0));
-    };
-    then "p4 = point(15, 0, 7)" |world,_step| {
-      assert_eq!(world.p4,point(15.0,0.0,7.0));
-    };
-    then "T * p = point(15, 0, 7)" |world,_step| {
-      assert_eq!(&world.mt * &world.p,point(15.0,0.0,7.0));
-    };
-});
-}
-
-mod rays_steps {
-  use super::*;
-  use rustrt::tuple::{point,vector};
-  use rustrt::matrix::{scaling,translation};
-  use rustrt::ray::{ray};
-  // Any type that implements cucumber_rust::World + Default can be the world
-  steps!(MyWorld => {
-    given regex "origin ← point\\((-?\\d+), (-?\\d+), (-?\\d+)\\)" (f32,f32,f32) |world,x,y,z,_step| {
-      world.origin = point(x,y,z);
-    };
-    given regex "direction ← vector\\((-?\\d+), (-?\\d+), (-?\\d+)\\)" (f32,f32,f32) |world,x,y,z,_step| {
-      world.direction = vector(x,y,z);
-    };
-    given regex "r ← ray\\(point\\((-?\\d+), (-?\\d+), (-?\\d+)\\), vector\\((-?\\d+), (-?\\d+), (-?\\d+)\\)\\)" (f32,f32,f32,f32,f32,f32) |world,x1,y1,z1,x2,y2,z2,_step| {
-      world.r = ray(point(x1,y1,z1),vector(x2,y2,z2));
-    };
-    given regex "m ← translation\\((-?\\d+), (-?\\d+), (-?\\d+)\\)" (f32,f32,f32) |world,x,y,z,_step| {
-      world.m = translation(x,y,z);
-    };
-    given regex "m ← scaling\\((-?\\d+), (-?\\d+), (-?\\d+)\\)" (f32,f32,f32) |world,x,y,z,_step| {
-      world.m = scaling(x,y,z);
-    };
-    when "r ← ray(origin, direction)" |world, _step| {
-      world.r = ray(world.origin, world.direction);
-    };
-    when "r2 ← transform(r, m)" |world, _step| {
-      world.r2 = world.r.transform(&world.m);
-    };
-    then "r.origin = origin" |world, _step| {
-      assert_eq!(world.r.origin(), &world.origin);
-    };
-    then "r.direction = direction" |world, _step| {
-      assert_eq!(world.r.direction(), &world.direction);
-    };
-    then regex "r2.origin = point\\((-?\\d+), (-?\\d+), (-?\\d+)\\)" (f32,f32,f32) |world,x,y,z,_step| {
-      assert_eq!(world.r2.origin(), &point(x,y,z));
-    };
-    then regex "r2.direction = vector\\((-?\\d+), (-?\\d+), (-?\\d+)\\)" (f32,f32,f32) |world,x,y,z,_step| {
-      assert_eq!(world.r2.direction(), &vector(x,y,z));
-    };
-    then regex "position\\(r, ([-+]?[0-9]*\\.?[0-9]+)\\) = point\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f32,f32,f32,f32) |world,t,x,y,z,_step| {
-      assert_eq!(world.r.position(t), point(x,y,z));
-    };
-  });
-}
-
-mod spheres_steps {
-  use super::*;
-  use rustrt::body::Body;
-  use rustrt::tuple::{point};
-  // Any type that implements cucumber_rust::World + Default can be the world
-  steps!(MyWorld => {
-    given regex "origin ← point\\((-?\\d+), (-?\\d+), (-?\\d+)\\)" (f32,f32,f32) |world,x,y,z,_step| {
-      world.origin = point(x,y,z);
-    };
-    given "s ← sphere()" |world, _step| {
-      world.s = sphere();
-    };
-    when "xs ← intersect(s, r)" |world,_step| {
-      world.xs = world.s.intersect(world.r);
-    };
-    then "xs.count = 0" |world,_step| {
-      assert!(world.xs.is_none());
-    };
-    then "xs.count = 2" |world,_step| {
-      assert!(world.xs.is_some());
-    };
-    then regex "xs\\[0\\] = ([-+]?[0-9]*\\.?[0-9]+)" (f32) |world,value,_step| {
-      assert_eq!(world.xs.unwrap().0,value);
-    };
-    then regex "xs\\[1\\] = ([-+]?[0-9]*\\.?[0-9]+)" (f32) |world,value,_step| {
-      assert_eq!(world.xs.unwrap().1,value);
-    };
-
-  });
-}
-
-mod intersections_steps {
-  use super::*;
-  use rustrt::intersection::{intersection,intersections};
-  // Any type that implements cucumber_rust::World + Default can be the world
-  steps!(MyWorld => {
-    given "shape ← sphere()" |world,_steps| {
-      world.shape = Shape::Sphere(sphere());
-    };
-    given "i ← intersection(4, shape)" |world,_steps| {
-      world.i = intersection(4.0, world.shape.clone());
-    };
-    given regex "i1 ← intersection\\((\\-?\\d), s\\)" (f32) |world,value,_steps| {
-      world.i1 = intersection(value, world.shape.clone());
-    };
-    given regex "i2 ← intersection\\((\\-?\\d), s\\)" (f32) |world,value,_steps| {
-      world.i2 = intersection(value, world.shape.clone());
-    };
-    given regex "i3 ← intersection\\((\\-?\\d), s\\)" (f32) |world,value,_steps| {
-      world.i3 = intersection(value, world.shape.clone());
-    };
-    given regex "i4 ← intersection\\((\\-?\\d), s\\)" (f32) |world,value,_steps| {
-      world.i4 = intersection(value, world.shape.clone());
-    };
-    given "xs ← intersections(i2, i1)" |world,_step| {
-      world.xs2 = intersections(vec!(world.i2.clone(),world.i1.clone()));
-    };
-    given "xs ← intersections(i1, i2, i3, i4)" |world,_step| {
-      world.xs2 = intersections(vec!(world.i1.clone(),world.i2.clone(),world.i3.clone(),world.i4.clone()));
-    };
-    when "i ← intersection(3.5, s)" |world,_step| {
-      world.i = intersection(3.5, world.shape.clone());
-    };
-    when "xs ← intersections(i1, i2)" |world,_step| {
-      world.xs2 = intersections(vec!(world.i1.clone(),world.i2.clone()));
-    };
-
-    when "i ← hit(xs)" |world,_step| {
-      world.oi = world.xs2.hitc();
-    };
-    then "i.t = 3.5" |world,_step| {
-      assert_eq!(*world.i.t(), 3.5);
-    };
-    then "i.object = s" |world,_step| {
-      assert_eq!(*world.i.object(), world.shape);
-    };
-    then "xs.count = 2" |world,_step| {
-      assert_eq!(*world.xs2.count(), 2);
-    };
-    then "xs[0].t = 1" |world,_step| {
-      assert_eq!(*world.xs2.intersections()[0].t(), 1.0);
-    };
-    then "xs[1].t = 2" |world,_step| {
-      assert_eq!(*world.xs2.intersections()[1].t(), 2.0);
-    };
-    then "i = i1" |world,_step| {
-      assert_eq!(&world.oi, &Some(world.i1.clone()));
-    };
-    then "i = i2" |world,_step| {
-      assert_eq!(&world.oi, &Some(world.i2.clone()));
-    };
-    then "i is nothing" |world,_step| {
-      assert_eq!(&world.oi, &None);
-    };
-    then "i = i4" |world,_step| {
-      assert_eq!(&world.oi, &Some(world.i4.clone()));
-    };
-  });
-}
 
 // Declares a before handler function named `a_before_fn`
 before!(a_before_fn => |_scenario| {
@@ -861,16 +611,12 @@ fn setup() {
 }
 
 cucumber! {
-  features: "./features", // Path to our feature files
+  features: "./features/simple", // Path to our feature files
   world: MyWorld, // The world needs to be the same for steps and the main cucumber call
   steps: &[
       tuple_steps::steps,
       canvas_steps::steps,
-      matrix_steps::steps,
-      transformations_steps::steps,
-      rays_steps::steps,
-      spheres_steps::steps,
-      intersections_steps::steps
+      matrix_steps::steps
   ],
   setup: setup, // Optional; called once before everything
   before: &[

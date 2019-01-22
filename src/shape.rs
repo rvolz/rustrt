@@ -26,9 +26,9 @@ impl Shape {
     }
   }
 
-  pub fn transform(&mut self, m: Matrix) {
+  pub fn set_transform(&mut self, m: Matrix) {
     match self {
-      Shape::Sphere(sphere) =>  sphere.transform(m)
+      Shape::Sphere(sphere) =>  sphere.set_transform(m)
     }
   }
 }

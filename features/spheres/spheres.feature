@@ -3,48 +3,48 @@ Feature: Spheres
 Scenario: A ray intersects a sphere at two points
   Given r ← ray(point(0, 0, -5), vector(0, 0, 1))
     And s ← sphere()
-  When xs ← intersect(s, r)
-  Then xs.count = 2
-    And xs[0] = 4.0
-    And xs[1] = 6.0
+  When xs1 ← intersect(s, r)
+  Then xs1.count = 2
+    And xs1[0] = 4.0
+    And xs1[1] = 6.0
 
 Scenario: A ray intersects a sphere at a tangent
   Given r ← ray(point(0, 1, -5), vector(0, 0, 1))
     And s ← sphere()
-  When xs ← intersect(s, r)
-  Then xs.count = 2
-    And xs[0] = 5.0
-    And xs[1] = 5.0
+  When xs1 ← intersect(s, r)
+  Then xs1.count = 2
+    And xs1[0] = 5.0
+    And xs1[1] = 5.0
 
 Scenario: A ray misses a sphere
   Given r ← ray(point(0, 2, -5), vector(0, 0, 1))
     And s ← sphere()
-  When xs ← intersect(s, r)
-  Then xs.count = 0
+  When xs1 ← intersect(s, r)
+  Then xs1.count = 0
 
 Scenario: A ray originates inside a sphere
   Given r ← ray(point(0, 0, 0), vector(0, 0, 1))
     And s ← sphere()
-  When xs ← intersect(s, r)
-  Then xs.count = 2
-    And xs[0] = -1.0
-    And xs[1] = 1.0
+  When xs1 ← intersect(s, r)
+  Then xs1.count = 2
+    And xs1[0] = -1.0
+    And xs1[1] = 1.0
 
 Scenario: A sphere is behind a ray
   Given r ← ray(point(0, 0, 5), vector(0, 0, 1))
     And s ← sphere()
-  When xs ← intersect(s, r)
-  Then xs.count = 2
-    And xs[0] = -6.0
-    And xs[1] = -4.0
+  When xs1 ← intersect(s, r)
+  Then xs1.count = 2
+    And xs1[0] = -6.0
+    And xs1[1] = -4.0
 
 Scenario: Intersect sets the object on the intersection
   Given r ← ray(point(0, 0, -5), vector(0, 0, 1))
-    And s ← sphere()
-  When xs ← intersect(s, r)
+    And shape ← sphere()
+  When xs ← intersect(shape, r)
   Then xs.count = 2
-    And xs[0].object = s
-    And xs[1].object = s
+    And xs[0].object = shape
+    And xs[1].object = shape
 
 Scenario: A sphere's default transformation
   Given s ← sphere()
@@ -60,17 +60,17 @@ Scenario: Intersecting a scaled sphere with a ray
   Given r ← ray(point(0, 0, -5), vector(0, 0, 1))
     And s ← sphere()
   When set_transform(s, scaling(2, 2, 2))
-    And xs ← intersect(s, r)
-  Then xs.count = 2
-    And xs[0].t = 3
-    And xs[1].t = 7
+    And xs1 ← intersect(s, r)
+  Then xs1.count = 2
+    And xs1[0].t = 3
+    And xs1[1].t = 7
 
 Scenario: Intersecting a translated sphere with a ray
   Given r ← ray(point(0, 0, -5), vector(0, 0, 1))
     And s ← sphere()
   When set_transform(s, translation(5, 0, 0))
-    And xs ← intersect(s, r)
-  Then xs.count = 0
+    And xs1 ← intersect(s, r)
+  Then xs1.count = 0
 
 Scenario: The normal on a sphere at a point on the x axis
   Given s ← sphere()

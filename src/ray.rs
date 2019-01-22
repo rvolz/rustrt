@@ -17,8 +17,8 @@ impl Ray {
   pub fn position(&self, t: f32) -> Tuple {
     self.origin + self.direction * t
   }
-  /// Transform a ray with a transformation matrix
-  pub fn transform(&self, m: &Matrix) -> Ray {
+  /// set_transform a ray with a transformation matrix
+  pub fn set_transform(&self, m: &Matrix) -> Ray {
     Ray {
       origin: m * &self.origin,
       direction: m * &self.direction

@@ -118,7 +118,7 @@ fn exc4() -> std::io::Result<()> {
   let mut c = canvas(width, height);
   let red = color(1.0,0.0,0.0);
   let mut unit_sphere = Shape::default();
-  unit_sphere.transform(rotation_z(PI/4.0)*scaling(0.5,1.0,1.0));
+  unit_sphere.set_transform(rotation_z(PI/4.0)*scaling(0.5,1.0,1.0));
   let eye = point(0.0,0.0,-5.0);
   let wall_z = 10.0;
   let wall_size = 7.0;
