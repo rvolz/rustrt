@@ -20,6 +20,8 @@ pub struct MyWorld {
   p: Tuple,
   p1: Tuple,
   p2: Tuple,
+  n: Tuple,
+  r: Tuple,
   v: Tuple,
   v1: Tuple,
   v2: Tuple,
@@ -49,7 +51,9 @@ impl std::default::Default for MyWorld {
         c3: tuple(0.0,0.0,0.0,0.0),
         p: tuple(0.0,0.0,0.0,0.0),
         p1: tuple(0.0,0.0,0.0,0.0),
-        p2: tuple(0.0,0.0,0.0,0.0),
+        p2: Tuple::default(),
+        n: Tuple::default(),
+        r: Tuple::default(),
         v: tuple(0.0,0.0,0.0,0.0),
         v1: tuple(0.0,0.0,0.0,0.0),
         v2: tuple(0.0,0.0,0.0,0.0),
@@ -101,6 +105,15 @@ mod tuple_steps {
         world.b = vector(n1, n2, n3);
       };
 
+      given regex "n ← vector\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f32,f32,f32) |world, n1, n2, n3, _step| {
+        world.n = vector(n1, n2, n3);
+      };
+
+      given "n ← vector(√2/2, √2/2, 0)" |world, _step| {
+        let t = 2f32.sqrt()/2f32;
+        world.n = vector(t, t, 0.0);
+      };
+
       given regex "v ← vector\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f32,f32,f32) |world, n1, n2, n3, _step| {
         world.v = vector(n1, n2, n3);
       };
@@ -128,6 +141,10 @@ mod tuple_steps {
 
       when "norm ← normalize(v)" |world, _step| {
         world.norm = world.v.normalize();
+      };
+
+      when "r ← reflect(v, n)" |world, _step| {
+        world.r = world.v.reflect(world.n);
       };
 
       then regex "a.x = ([-+]?[0-9]*\\.?[0-9]+)" (f32) |world, number, _step| {
@@ -172,6 +189,10 @@ mod tuple_steps {
 
       then regex "v = tuple\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f32,f32,f32,f32) |world, n1, n2, n3, n4, _step| {
         assert_eq!(world.v, tuple(n1, n2, n3, n4));
+      };
+
+      then regex "r = vector\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f32,f32,f32) |world, n1, n2, n3, _step| {
+        assert_eq!(world.r, vector(n1, n2, n3));
       };
 
       then regex "a1 \\+ a2 = tuple\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f32,f32,f32,f32) |world, n1, n2, n3, n4, _step| {

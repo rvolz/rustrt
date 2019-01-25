@@ -82,6 +82,7 @@ impl Tuple {
     x.sqrt()
   }
 
+  /// Normalize a vector
   pub fn normalize(&self) -> Tuple {
     if !is_vector(&self) {
       panic!("Trying to normalize a non-vector!");
@@ -93,6 +94,14 @@ impl Tuple {
       z: self.z/m,
       w: self.w/m
     }
+  }
+
+  /// Reflect a vector
+  pub fn reflect(&self, normal: Tuple) -> Tuple {
+    if !is_vector(&self) {
+      panic!("Trying to reflect a non-vector!");
+    }
+    *self - normal * 2.0 * self.dot(normal)
   }
 }
 
