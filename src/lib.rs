@@ -6,3 +6,4 @@ pub mod body;
 pub mod intersection;
 pub mod sphere;
 pub mod shape;
+pub mod light;

@@ -24,6 +24,10 @@ harness = false # Allows Cucumber to print output instead of libtest
 name = "c_spheres"
 harness = false # Allows Cucumber to print output instead of libtest
 
+[[test]]
+name = "c_lights"
+harness = false # Allows Cucumber to print output instead of libtest
+
 [dependencies]
 float-cmp = "^0.4"
 ordered-float = "^1.0"
