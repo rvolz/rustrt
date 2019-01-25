@@ -41,6 +41,13 @@ impl Body for Sphere {
       None
     }
   }
+  fn normal_at(&self, world_point: Tuple) -> Tuple {
+    let object_point = &self.transform.inverse() * &world_point;
+    let object_normal = object_point - point(0.0,0.0,0.0);
+    let mut world_normal = &self.transform.inverse().transpose() * &object_normal;
+    world_normal.set_w(0.0);
+    world_normal.normalize()
+  }
   fn set_transform(&mut self, m: Matrix) {
     self.transform = m;
   }

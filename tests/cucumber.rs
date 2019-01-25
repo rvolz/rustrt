@@ -4,10 +4,6 @@ extern crate rustrt;
 use rustrt::tuple::{Tuple, tuple, color};
 use rustrt::canvas::{Canvas, canvas};
 use rustrt::matrix::{Matrix, identity};
-use rustrt::ray::{Ray};
-use rustrt::sphere::{sphere,Sphere};
-use rustrt::shape::{Shape};
-use rustrt::intersection::{Intersection,intersection,Intersections,intersections};
 #[allow(unused_imports)] // Import is required, though
 use float_cmp::{ApproxEq};
 
@@ -21,12 +17,9 @@ pub struct MyWorld {
   c1: Tuple,
   c2: Tuple,
   c3: Tuple,
-  direction: Tuple,
   p: Tuple,
   p1: Tuple,
   p2: Tuple,
-  p3: Tuple,
-  p4: Tuple,
   v: Tuple,
   v1: Tuple,
   v2: Tuple,
@@ -38,34 +31,12 @@ pub struct MyWorld {
   m: Matrix,
   ma: Matrix,
   mb: Matrix,
-  mc: Matrix,
-  mt: Matrix,
-  origin: Tuple,
-  r: Ray,
-  r2: Ray,
-  t: Matrix,
-  transform: Matrix,
-  inv: Matrix,
-  half_quarter: Matrix,
-  full_quarter: Matrix,
-  s: Sphere,
-  xs: Option<(f32,f32)>,
-  xs2: Intersections,
-  i: Intersection,
-  i1: Intersection,
-  i2: Intersection,
-  i3: Intersection,
-  i4: Intersection,
-  shape: Shape,
-  oi: Option<Intersection>,
-  oi1: Option<Intersection>,
-  oi2: Option<Intersection>,
+  mc: Matrix
 }
 
 impl cucumber_rust::World for MyWorld {}
 impl std::default::Default for MyWorld {
   fn default() -> MyWorld {
-    use rustrt::ray::{ray};
     // This function is called every time a new scenario is started
     MyWorld {
         a: tuple(0.0,0.0,0.0,0.0),
@@ -76,12 +47,9 @@ impl std::default::Default for MyWorld {
         c1: tuple(0.0,0.0,0.0,0.0),
         c2: tuple(0.0,0.0,0.0,0.0),
         c3: tuple(0.0,0.0,0.0,0.0),
-        direction: tuple(0.0,0.0,0.0,0.0),
         p: tuple(0.0,0.0,0.0,0.0),
         p1: tuple(0.0,0.0,0.0,0.0),
         p2: tuple(0.0,0.0,0.0,0.0),
-        p3: tuple(0.0,0.0,0.0,0.0),
-        p4: tuple(0.0,0.0,0.0,0.0),
         v: tuple(0.0,0.0,0.0,0.0),
         v1: tuple(0.0,0.0,0.0,0.0),
         v2: tuple(0.0,0.0,0.0,0.0),
@@ -93,28 +61,7 @@ impl std::default::Default for MyWorld {
         m: Matrix::default(),
         ma: Matrix::default(),
         mb: Matrix::default(),
-        mc: Matrix::default(),
-        mt: Matrix::default(),
-        origin: tuple(0.0,0.0,0.0,0.0),
-        r: ray(tuple(0.0,0.0,0.0,0.0),tuple(0.0,0.0,0.0,0.0)),
-        r2: ray(tuple(0.0,0.0,0.0,0.0),tuple(0.0,0.0,0.0,0.0)),
-        t: Matrix::default(),
-        transform: Matrix::default(),
-        inv: Matrix::default(),
-        half_quarter: Matrix::default(),
-        full_quarter: Matrix::default(),
-        s: sphere(),
-        xs: None,
-        xs2: intersections(vec!()),
-        i: intersection(0.0,Shape::Sphere(sphere())),
-        i1: intersection(0.0,Shape::Sphere(sphere())),
-        i2: intersection(0.0,Shape::Sphere(sphere())),
-        i3: intersection(0.0,Shape::Sphere(sphere())),
-        i4: intersection(0.0,Shape::Sphere(sphere())),
-        shape: Shape::Sphere(sphere()),
-        oi: Some(intersection(0.0,Shape::Sphere(sphere()))),
-        oi1: Some(intersection(0.0,Shape::Sphere(sphere()))),
-        oi2: Some(intersection(0.0,Shape::Sphere(sphere()))),
+        mc: Matrix::default()
     }
   }
 }

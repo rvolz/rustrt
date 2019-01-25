@@ -13,6 +13,8 @@ use float_cmp::{ApproxEq};
 pub struct MyWorld {
   // You can use this struct for mutable context in scenarios.
   origin: Tuple,
+  m: Matrix,
+  n: Tuple,
   r: Ray,
   t: Matrix,
   s: Sphere,
@@ -27,6 +29,8 @@ impl std::default::Default for MyWorld {
     // This function is called every time a new scenario is started
     MyWorld {
         origin: Tuple::default(),
+        m: Matrix::default(),
+        n: Tuple::default(),
         r: ray(Tuple::default(),Tuple::default()),
         t: Matrix::default(),
         s: sphere(),
@@ -42,7 +46,10 @@ mod spheres_steps {
   use super::*;
   use rustrt::body::Body;
   use rustrt::tuple::{point,vector};
-  use rustrt::matrix::{translation,scaling};
+  use rustrt::matrix::{translation,scaling,rotation_z};
+  use core::f32::consts::PI;
+  use round::round;
+  use std::f64;
   // Any type that implements cucumber_rust::World + Default can be the world
   steps!(MyWorld => {
     given regex "origin ← point\\((-?\\d+), (-?\\d+), (-?\\d+)\\)" (f32,f32,f32) |world,x,y,z,_step| {
@@ -60,6 +67,15 @@ mod spheres_steps {
     given regex "t ← translation\\((-?\\d+), (-?\\d+), (-?\\d+)\\)" (f32,f32,f32) |world,x,y,z,_step| {
       world.t = translation(x,y,z);
     };
+    given "m ← scaling(1, 0.5, 1) * rotation_z(π/5)" |world,_step| {
+      world.m = scaling(1.0,0.5,1.0) * rotation_z(PI/5.0);
+    };
+    given regex "set_transform\\(s, translation\\((-?\\d+), (-?\\d+), (-?\\d+)\\)\\)" (f32,f32,f32) |world,x,y,z,_step| {
+      world.s.set_transform(translation(x,y,z));
+    };
+    given "set_transform(s, m)" |world,_step| {
+      world.s.set_transform(world.m.clone());
+    };
     when "xs1 ← intersect(s, r)" |world,_step| {
       world.xs = world.s.intersect(world.r);
     };
@@ -73,7 +89,19 @@ mod spheres_steps {
       world.s.set_transform(scaling(x,y,z));
     };
     when regex "set_transform\\(s, translation\\((-?\\d+), (-?\\d+), (-?\\d+)\\)\\)" (f32,f32,f32) |world,x,y,z,_step| {
-      world.s.set_transform(scaling(x,y,z));
+      world.s.set_transform(translation(x,y,z));
+    };
+    when regex "n ← normal_at\\(s, point\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)\\)" (f32,f32,f32) |world,x,y,z,_step| {
+      world.n = world.s.normal_at(point(x,y,z));
+    };
+    when "n ← normal_at(s, point(√3/3, √3/3, √3/3))" |world,_step| {
+      let t = 3f32.sqrt()/3f32;
+      world.n = world.s.normal_at(point(t,t,t));
+    };
+    when "n ← normal_at(s, point(0, √2/2, -√2/2))" |world,_step| {
+      let t1 = 2f32.sqrt()/2f32;
+      let t2 = 2f32.sqrt()/-2f32;
+      world.n = world.s.normal_at(point(0.0,t1,t2));
     };
     then "xs1.count = 0" |world,_step| {
       assert!(world.xs.is_none());
@@ -107,6 +135,19 @@ mod spheres_steps {
     };
     then regex "xs1\\[1\\].t = ([-+]?[0-9]*\\.?[0-9]+)" (f32) |world,value,_step| {
       assert_eq!(world.xs.unwrap().1,value);
+    };
+    then regex "n = vector\\(([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+), ([-+]?[0-9]*\\.?[0-9]+)\\)" (f32,f32,f32) |world,x,y,z,_step| {
+      let x1 = round(*world.n.get_x() as f64,1) as f32;
+      let y1 = round(*world.n.get_y() as f64,5) as f32;
+      let z1 = round(*world.n.get_z() as f64,5) as f32;
+      assert_eq!(vector(x1,y1,z1), vector(x,y,z));
+    };
+    then "n = vector(√3/3, √3/3, √3/3)" |world,_step| {
+      let t = 3f32.sqrt()/3f32;
+      assert_eq!(world.n, vector(t,t,t));
+    };
+    then "n = normalize(n)" |world,_step| {
+      assert_eq!(world.n, world.n.normalize());
     };
   });
 }

@@ -41,6 +41,7 @@ impl Tuple {
   pub fn get_y(&self) -> &f32 { &self.y }
   pub fn get_z(&self) -> &f32 { &self.z }
   pub fn get_w(&self) -> &f32 { &self.w }
+  pub fn set_w(&mut self, w: f32) { self.w = w }
   pub fn red(&self) -> &f32 { &self.x }
   pub fn green(&self) -> &f32 { &self.y }
   pub fn blue(&self) -> &f32 { &self.z }
