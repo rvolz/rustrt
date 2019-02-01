@@ -7,6 +7,7 @@ pub mod shape;
 pub mod sphere;
 pub mod body;
 pub mod intersection;
+pub mod light;
 pub mod material;
 
 use core::f32::consts::{PI};
@@ -18,6 +19,8 @@ use crate::matrix::*;
 use crate::body::Body;
 use crate::shape::Shape;
 use crate::ray::ray;
+use crate::material::{Material, material};
+use crate::light::point_light;
 
 pub struct Projectile {
   position: Tuple,
@@ -140,9 +143,47 @@ fn exc4() -> std::io::Result<()> {
   fs::write("exc4.ppm", c.canvas_to_ppm())
 }
 
+fn exc5() -> std::io::Result<()> {
+  let width = 100;
+  let height = 100;
+  let mut c = canvas(width, height);
+  let red = color(1.0,0.0,0.0);
+  let mut unit_sphere = Shape::default();
+  let mut mat = material();
+  mat.set_color(color(1.0,0.2,1.0));
+  unit_sphere.set_material(mat);
+  unit_sphere.set_transform(rotation_z(PI/4.0)*scaling(0.5,1.0,1.0));
+  let eye = point(0.0,0.0,-5.0);
+  let light = point_light(point(-10.0, 10.0, -10.0), color(1.0,1.0,1.0));
+  let wall_z = 10.0;
+  let wall_size = 7.0;
+  let pixel_size = wall_size / width as f32;
+  let half = wall_size / 2.0;
+  for y in 0..height {
+    let world_y = half - pixel_size * y as f32;
+    for x in 0..width {
+      let world_x = -half + pixel_size * x as f32;
+      let position = point(world_x, world_y,wall_z);
+      let r = ray(eye,(position - eye).normalize());
+      let xs = unit_sphere.intersect(r);
+      let hit = xs.hit();
+      if hit.is_some() {
+        let h = hit.unwrap();
+        let point = r.position(*h.t());
+        let normal = h.object().normal_at(point);
+        let eye = -*r.direction();
+        let color = h.object().material().lighting(light,point,eye,normal);
+        c.write_pixel(x, y, color);
+      }
+    }
+  }
+  fs::write("exc5.ppm", c.canvas_to_ppm())
+}
+
 fn main() -> std::io::Result<()> {
   //exc1();
   //exc2();
   //exc3()
-  exc4()
+  //exc4()
+  exc5()
 }

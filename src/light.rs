@@ -7,7 +7,7 @@ pub struct Light {
   position: Tuple
 }
 
-pub fn light(intensity: Tuple, position: Tuple) ->  Light {
+pub fn point_light(position: Tuple, intensity: Tuple) ->  Light {
   LightBuilder::default()
     .intensity(intensity)
     .position(position)

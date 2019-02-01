@@ -2,7 +2,7 @@
 extern crate cucumber_rust;
 extern crate rustrt;
 use rustrt::tuple::{Tuple};
-use rustrt::light::{Light,light};
+use rustrt::light::{Light,point_light};
 #[allow(unused_imports)] // Import is required, though
 use float_cmp::{ApproxEq};
 
@@ -38,7 +38,7 @@ mod lights_steps {
       world.position = point(x,y,z);
     };
     when "light ← point_light(position, intensity)" |world, _step| {
-      world.light = light(world.intensity, world.position);
+      world.light = point_light(world.position, world.intensity);
     };
     then "light.position = position" |world, _step| {
       assert_eq!(world.light.position(), &world.position);

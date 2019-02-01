@@ -1,8 +1,10 @@
 use crate::ray::Ray;
 use crate::matrix::Matrix;
 use crate::body::Body;
+use crate::tuple::Tuple;
 use crate::sphere::{Sphere,sphere};
 use crate::intersection::{Intersections,intersection,intersections};
+use crate::material::Material;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Shape {
@@ -23,6 +25,24 @@ impl Shape {
           None => intersections(vec![])
         }
       }
+    }
+  }
+
+  pub fn material(&self) -> &Material {
+    match self {
+      Shape::Sphere(sphere) =>  sphere.material()
+    }
+  }
+
+  pub fn normal_at(&self, point: Tuple) -> Tuple {
+    match self {
+      Shape::Sphere(sphere) =>  sphere.normal_at(point)
+    }
+  }
+
+  pub fn set_material(&mut self, m: Material) {
+    match self {
+      Shape::Sphere(sphere) =>  sphere.set_material(m)
     }
   }
 
