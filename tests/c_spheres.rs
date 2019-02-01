@@ -7,6 +7,7 @@ use rustrt::ray::{Ray,ray};
 use rustrt::intersection::{Intersections,intersections};
 use rustrt::sphere::{Sphere,sphere};
 use rustrt::shape::{Shape};
+use rustrt::material::{Material,material};
 #[allow(unused_imports)] // Import is required, though
 use float_cmp::{ApproxEq};
 
@@ -14,6 +15,7 @@ pub struct MyWorld {
   // You can use this struct for mutable context in scenarios.
   origin: Tuple,
   m: Matrix,
+  m2: Material,
   n: Tuple,
   r: Ray,
   t: Matrix,
@@ -30,6 +32,7 @@ impl std::default::Default for MyWorld {
     MyWorld {
         origin: Tuple::default(),
         m: Matrix::default(),
+        m2: Material::default(),
         n: Tuple::default(),
         r: ray(Tuple::default(),Tuple::default()),
         t: Matrix::default(),
@@ -76,6 +79,12 @@ mod spheres_steps {
     given "set_transform(s, m)" |world,_step| {
       world.s.set_transform(world.m.clone());
     };
+    given "m ← material()" |world,_step| {
+      world.m2 = material();
+    };
+    given "m.ambient ← 1" |world,_step| {
+      world.m2.set_ambient(1.0);
+    };
     when "xs1 ← intersect(s, r)" |world,_step| {
       world.xs = world.s.intersect(world.r);
     };
@@ -102,6 +111,12 @@ mod spheres_steps {
       let t1 = 2f32.sqrt()/2f32;
       let t2 = 2f32.sqrt()/-2f32;
       world.n = world.s.normal_at(point(0.0,t1,t2));
+    };
+    when "m ← s.material" |world,_step| {
+      world.m2 = world.s.material().clone();
+    };
+    when "s.material ← m" |world,_step| {
+      world.s.set_material(world.m2.clone());
     };
     then "xs1.count = 0" |world,_step| {
       assert!(world.xs.is_none());
@@ -148,6 +163,12 @@ mod spheres_steps {
     };
     then "n = normalize(n)" |world,_step| {
       assert_eq!(world.n, world.n.normalize());
+    };
+    then "m = material()" |world,_step| {
+      assert_eq!(world.m2, material());
+    };
+    then "s.material = m" |world,_step| {
+      assert_eq!(world.s.material(),&world.m2);
     };
   });
 }

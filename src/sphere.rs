@@ -3,13 +3,15 @@ use crate::body::*;
 use crate::matrix::{Matrix,identity};
 use crate::ray::Ray;
 use crate::tuple::{Tuple, point, vector};
+use crate::material::{Material,material};
 
 /// A 3D sphere
 #[derive(Default, Builder, Debug, Clone)]
 pub struct Sphere {
   origin: Tuple,
   direction: Tuple,
-  transform: Matrix
+  transform: Matrix,
+  material: Material
 }
 
 /// Factory function
@@ -17,7 +19,8 @@ pub fn sphere() -> Sphere {
   Sphere {
     origin: point(0.0,0.0,0.0),
     direction: vector(0.0,0.0,0.0),
-    transform: identity()
+    transform: identity(),
+    material: material()
   }
 }
 
@@ -41,12 +44,16 @@ impl Body for Sphere {
       None
     }
   }
+  fn material(&self) -> &Material { &self.material }
   fn normal_at(&self, world_point: Tuple) -> Tuple {
     let object_point = &self.transform.inverse() * &world_point;
     let object_normal = object_point - point(0.0,0.0,0.0);
     let mut world_normal = &self.transform.inverse().transpose() * &object_normal;
     world_normal.set_w(0.0);
     world_normal.normalize()
+  }
+  fn set_material(&mut self, m: Material) {
+    self.material = m;
   }
   fn set_transform(&mut self, m: Matrix) {
     self.transform = m;

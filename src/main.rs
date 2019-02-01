@@ -7,6 +7,7 @@ pub mod shape;
 pub mod sphere;
 pub mod body;
 pub mod intersection;
+pub mod material;
 
 use core::f32::consts::{PI};
 use std::fs;
